@@ -183,6 +183,40 @@
   #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #323232; color: white; padding: 12px 24px; border-radius: 24px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; white-space: nowrap; }
   #toast.show { opacity: 1; }
   #loading { text-align: center; padding: 40px; color: #888; font-size: 15px; grid-column: 1/-1; }
+ /* Product Detail Sheet */
+  .product-sheet { direction: rtl; }
+  .product-sheet-img {
+    width: 100%; height: 220px; object-fit: contain;
+    background: #f8f9fa; border-radius: 0;
+  }
+  .product-sheet-img-placeholder {
+    width: 100%; height: 220px; background: #f0f2f5;
+    display: flex; align-items: center; justify-content: center;
+    color: #bbb; font-size: 14px;
+  }
+  .product-sheet-body { padding: 20px; }
+  .product-sheet-title { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
+  .product-sheet-sku { font-size: 13px; color: #888; margin-bottom: 20px; }
+  .product-sheet-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 13px 0; border-bottom: 1px solid #f0f0f0; font-size: 15px;
+  }
+  .product-sheet-row:last-of-type { border-bottom: none; }
+  .product-sheet-label { color: #888; font-size: 14px; flex-shrink: 0; margin-left: 12px; }
+  .product-sheet-value { font-weight: 500; text-align: left; word-break: break-word; }
+  .product-sheet-link { color: #1a73e8; text-decoration: none; font-size: 14px; word-break: break-all; }
+  .product-sheet-footer { padding: 16px 20px; border-top: 1px solid #eee; }
+  .product-sheet-footer button {
+    width: 100%; padding: 14px; border: none; border-radius: 12px;
+    font-size: 16px; font-weight: bold; cursor: pointer; color: white;
+  }
+  .sheet-back-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 20px; border-bottom: 1px solid #f0f0f0;
+    cursor: pointer; color: #1a73e8; font-size: 15px;
+    background: none; border-top: none; border-right: none; border-left: none;
+    width: 100%; text-align: right; direction: rtl;
+  }
 </style>
 </head>
 <body>
@@ -263,6 +297,47 @@
 
 </div><!-- end #app -->
 
+<!-- Product Detail -->
+<div class="overlay" id="product-overlay">
+  <div class="sheet product-sheet">
+    <button class="sheet-back-btn" onclick="closeProduct()">← חזור</button>
+    <div id="product-img-wrap"></div>
+    <div class="sheet-body" style="overflow-y:auto; -webkit-overflow-scrolling:touch;">
+      <div class="product-sheet-body">
+        <div class="product-sheet-title" id="pd-name"></div>
+        <div class="product-sheet-sku" id="pd-sku"></div>
+        <div class="product-sheet-row">
+          <span class="product-sheet-label">מותג</span>
+          <span class="product-sheet-value" id="pd-brand"></span>
+        </div>
+        <div class="product-sheet-row">
+          <span class="product-sheet-label">מחיר משווק</span>
+          <span class="product-sheet-value" id="pd-price-retail"></span>
+        </div>
+        <div class="product-sheet-row">
+          <span class="product-sheet-label">מחיר לצרכן</span>
+          <span class="product-sheet-value" id="pd-price-consumer"></span>
+        </div>
+        <div class="product-sheet-row">
+          <span class="product-sheet-label">מלאי</span>
+          <span class="product-sheet-value" id="pd-stock"></span>
+        </div>
+        <div class="product-sheet-row" id="pd-desc-row">
+          <span class="product-sheet-label">תיאור מוצר</span>
+          <span class="product-sheet-value" id="pd-desc"></span>
+        </div>
+        <div class="product-sheet-row" id="pd-link-row">
+          <span class="product-sheet-label">לינק לאתר היצרן</span>
+          <a class="product-sheet-link" id="pd-link" href="#" target="_blank"></a>
+        </div>
+      </div>
+    </div>
+    <div class="product-sheet-footer">
+      <button id="pd-add-btn" onclick="addFromDetail()"></button>
+    </div>
+  </div>
+</div>
+ 
 <div id="toast"></div>
 
 <script>
@@ -385,14 +460,23 @@
       card.className = 'card' + (outOfStock ? ' out-of-stock' : '') + (inCart ? ' selected' : '');
       card.id = 'card-' + p.sku;
       card.style.borderColor = inCart ? headerColor : 'transparent';
+      card.style.cursor = 'pointer';
+      card.querySelector && null;
+      card.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-add')) return;
+        openProduct(p.sku);
+      });
       card.innerHTML =
-        '<div class="card-body">' + imgHtml +
-          '<div class="card-info">' +
-            '<div class="card-price" style="color:' + headerColor + '">₪' + p.price + '</div>' +
-            '<div class="card-name">' + p.name + '</div>' +
-            '<div class="card-sku">' + p.sku + '</div>' +
-            '<div class="card-stock">Stock: <span>' + p.stock + '</span></div>' +
-          '</div></div>' +
+        '<div onclick="openProduct(\'' + p.sku + '\')" style="cursor:pointer">' +
+          '<div class="card-body">' + imgHtml +
+            '<div class="card-info">' +
+              '<div class="card-price" style="color:' + headerColor + '">₪' + p.price + '</div>' +
+              '<div class="card-name">' + p.name + '</div>' +
+              '<div class="card-sku">' + p.sku + '</div>' +
+              '<div class="card-stock">Stock: <span>' + p.stock + '</span></div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
         '<div class="card-footer">' + btnHtml + '</div>';
       grid.appendChild(card);
     });
@@ -586,6 +670,69 @@
     if (!sentinel) return;
     fab.classList.toggle('visible', sentinel.getBoundingClientRect().bottom < 0);
   }, { passive: true });
+
+ var selectedProduct = null;
+
+  function openProduct(sku) {
+    var p = products.find(function(x) { return x.sku === sku; });
+    if (!p) return;
+    selectedProduct = p;
+
+    // תמונה
+    var imgWrap = document.getElementById('product-img-wrap');
+    imgWrap.innerHTML = p.imageUrl
+      ? '<img class="product-sheet-img" src="' + p.imageUrl + '" onerror="this.outerHTML=\'<div class=product-sheet-img-placeholder>No Image</div>\'">'
+      : '<div class="product-sheet-img-placeholder">No Image</div>';
+
+    document.getElementById('pd-name').textContent  = p.name;
+    document.getElementById('pd-sku').textContent   = p.sku;
+    document.getElementById('pd-brand').textContent = p.brand || '—';
+    document.getElementById('pd-price-retail').textContent   = p.retailPrice ? '₪' + p.retailPrice : '—';
+    document.getElementById('pd-price-consumer').textContent = p.price ? '₪' + p.price : '—';
+    document.getElementById('pd-stock').textContent = p.stock;
+
+    var descRow = document.getElementById('pd-desc-row');
+    if (p.description) {
+      document.getElementById('pd-desc').textContent = p.description;
+      descRow.style.display = 'flex';
+    } else {
+      descRow.style.display = 'none';
+    }
+
+    var linkRow = document.getElementById('pd-link-row');
+    if (p.siteUrl) {
+      document.getElementById('pd-link').href        = p.siteUrl;
+      document.getElementById('pd-link').textContent = p.siteUrl;
+      linkRow.style.display = 'flex';
+    } else {
+      linkRow.style.display = 'none';
+    }
+
+    // כפתור הוסף / כבר בעגלה
+    var addBtn = document.getElementById('pd-add-btn');
+    addBtn.style.background = headerColor;
+    var inCart = cart[p.sku] && cart[p.sku].qty > 0;
+    if (p.stock <= 0 || p.displayOnly) {
+      addBtn.style.display = 'none';
+    } else {
+      addBtn.style.display = 'block';
+      addBtn.textContent = inCart ? '✓ נוסף לעגלה (' + cart[p.sku].qty + ') — הוסף עוד' : '+ הוסף לעגלה';
+    }
+
+    document.getElementById('product-overlay').classList.add('open');
+  }
+
+  function closeProduct() {
+    document.getElementById('product-overlay').classList.remove('open');
+    selectedProduct = null;
+  }
+
+  function addFromDetail() {
+    if (!selectedProduct) return;
+    addToCart(selectedProduct.sku);
+    var addBtn = document.getElementById('pd-add-btn');
+    addBtn.textContent = '✓ נוסף לעגלה (' + cart[selectedProduct.sku].qty + ') — הוסף עוד';
+  }
 </script>
 </body>
 </html>
