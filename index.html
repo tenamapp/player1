@@ -133,7 +133,7 @@
   .overlay.open { display: flex; }
   .sheet {
     background: white; border-radius: 20px 20px 0 0;
-    width: 100%; max-width: 960px; max-height: 85vh;
+    width: 100%; max-width: 960px; max-height: 95vh;
     display: flex; flex-direction: column; direction: rtl;
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -283,7 +283,7 @@
         <span id="cart-total">₪0</span>
       </div>
       <div class="sheet-btns">
-        <button class="btn-back" onclick="closeCart()">← חזור</button>
+        <button class="btn-back" onclick="closeCart()">חזור →</button>
         <button class="btn-send" id="send-btn" onclick="sendAll()">✓ שלח דיווח</button>
       </div>
     </div>
@@ -300,9 +300,9 @@
 <!-- Product Detail -->
 <div class="overlay" id="product-overlay">
   <div class="sheet product-sheet">
-    <button class="sheet-back-btn" onclick="closeProduct()">← חזור</button>
-    <div id="product-img-wrap"></div>
+    <button class="sheet-back-btn" onclick="closeProduct()">חזור →</button>
     <div class="sheet-body" style="overflow-y:auto; -webkit-overflow-scrolling:touch;">
+      <div id="product-img-wrap"></div>
       <div class="product-sheet-body">
         <div class="product-sheet-title" id="pd-name"></div>
         <div class="product-sheet-sku" id="pd-sku"></div>
@@ -311,11 +311,11 @@
           <span class="product-sheet-value" id="pd-brand"></span>
         </div>
         <div class="product-sheet-row">
-          <span class="product-sheet-label">מחיר משווק</span>
+          <span class="product-sheet-label">מחיר משווק <small style="color:#aaa;font-weight:normal">ללא מע"מ</small></span>
           <span class="product-sheet-value" id="pd-price-retail"></span>
         </div>
         <div class="product-sheet-row">
-          <span class="product-sheet-label">מחיר לצרכן</span>
+          <span class="product-sheet-label">מחיר לצרכן <small style="color:#aaa;font-weight:normal">כולל מע"מ</small></span>
           <span class="product-sheet-value" id="pd-price-consumer"></span>
         </div>
         <div class="product-sheet-row">
@@ -341,7 +341,7 @@
 <div id="toast"></div>
 
 <script>
-  var API_URL = 'https://script.google.com/macros/s/AKfycbyMX8Uf6HPHhFfVwTaQZuo9B8sCIclpX4XhT3mOcbtdtRlz7KgSmtUT2rJcJp_D52w/exec';
+  var API_URL = 'https://script.google.com/macros/s/AKfycbxwGAKJBnRYExNEFIRxEwQg2_wP0KaWs-nudTEU5G6Q7CP1I2htI0wFJVUWbTzYKR-R/exec';
 
   // סיסמאות – CLIENT_PIN ללקוח, ADMIN_PIN לך
   var CLIENT_PIN = '1234';
