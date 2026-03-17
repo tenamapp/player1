@@ -1,0 +1,22 @@
+{
+  "name": "Player 1 - מכר",
+  "short_name": "Player 1",
+  "description": "מערכת דיווח מכירות",
+  "start_url": "/player1/",
+  "display": "standalone",
+  "background_color": "#e8eaed",
+  "theme_color": "#1a73e8",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/1a73e8/ffffff?text=P1",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/1a73e8/ffffff?text=P1",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
