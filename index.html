@@ -719,7 +719,11 @@
       addBtn.textContent = inCart ? '✓ נוסף לעגלה (' + cart[p.sku].qty + ') — הוסף עוד' : '+ הוסף לעגלה';
     }
 
-    document.getElementById('product-overlay').classList.add('open');
+    var overlay = document.getElementById('product-overlay');
+    overlay.classList.add('open');
+    // איפוס גלילה לראש
+    var body = overlay.querySelector('.sheet-body');
+    if (body) body.scrollTop = 0;
   }
 
   function closeProduct() {
