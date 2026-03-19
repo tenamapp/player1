@@ -7,10 +7,11 @@
 <link rel="manifest" href="manifest.json">
 <title>Sales Report</title>
 <style>
+  /* ── Reset ── */
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #e8eaed; color: #333; }
 
-  /* LOGIN */
+  /* ── מסך כניסה ── */
   #login-screen {
     position: fixed; inset: 0; background: #e8eaed;
     display: flex; align-items: center; justify-content: center; z-index: 999;
@@ -24,16 +25,18 @@
   .login-box p { font-size: 14px; color: #888; margin-bottom: 24px; }
   .login-box input {
     width: 100%; padding: 12px 16px; border: 1px solid #ddd;
-    border-radius: 10px; font-size: 16px; margin-bottom: 12px;
-    text-align: center; letter-spacing: 4px;
+    border-radius: 10px; font-size: 16px; margin-bottom: 8px;
+    text-align: right; direction: rtl;
   }
+  .login-box input[type=password] { letter-spacing: 4px; text-align: center; }
   .login-box button {
     width: 100%; padding: 13px; border: none; border-radius: 10px;
     background: #1a73e8; color: white; font-size: 16px;
-    font-weight: bold; cursor: pointer;
+    font-weight: bold; cursor: pointer; margin-top: 4px;
   }
-  .login-error { color: #e53935; font-size: 13px; margin-top: 8px; display: none; }
+  .login-error { color: #e53935; font-size: 13px; margin-top: 10px; display: none; }
 
+  /* ── Header ── */
   header { background: #e8eaed; }
   .header-inner {
     max-width: 960px; margin: 0 auto; padding: 14px 20px;
@@ -43,6 +46,7 @@
   .header-logo { height: 36px; width: 36px; border-radius: 6px; object-fit: cover; }
   .header-title { font-size: 18px; font-weight: bold; color: white; text-align: center; }
 
+  /* ── Toolbar (חיפוש + פילטר + עגלה) ── */
   .toolbar { background: #e8eaed; padding: 10px 0 6px; }
   .toolbar-inner {
     max-width: 960px; margin: 0 auto; padding: 0 16px;
@@ -54,12 +58,22 @@
     width: 100%; padding: 10px 36px 10px 14px; border: 1px solid #ddd;
     border-radius: 8px; font-size: 15px; direction: rtl; background: white;
   }
+
+  /* ── כפתור פילטר ── */
   .filter-btn {
     padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;
     background: white; cursor: pointer; display: flex; align-items: center;
     justify-content: center; min-width: 42px; flex-shrink: 0; order: 2;
   }
   .filter-btn.active { background: #eef3fd; border-color: #1a73e8; }
+  .filter-icon { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+  .filter-icon span { display: block; height: 2px; background: #555; border-radius: 2px; }
+  .filter-icon span:nth-child(1) { width: 18px; }
+  .filter-icon span:nth-child(2) { width: 13px; }
+  .filter-icon span:nth-child(3) { width: 8px; }
+  .filter-btn.active .filter-icon span { background: #1a73e8; }
+
+  /* ── כפתור דווח מכירה בטולבר ── */
   .cart-btn {
     padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px;
     background: white; cursor: pointer; display: flex; align-items: center;
@@ -76,13 +90,8 @@
     text-align: center; display: none; margin-right: 4px;
   }
   .cart-badge.show { display: inline-block; }
-  .filter-icon { display: flex; flex-direction: column; gap: 3px; align-items: center; }
-  .filter-icon span { display: block; height: 2px; background: #555; border-radius: 2px; }
-  .filter-icon span:nth-child(1) { width: 18px; }
-  .filter-icon span:nth-child(2) { width: 13px; }
-  .filter-icon span:nth-child(3) { width: 8px; }
-  .filter-btn.active .filter-icon span { background: #1a73e8; }
 
+  /* ── תפריט פילטר קטגוריות ── */
   .filter-dropdown {
     display: none; position: absolute; background: white;
     border: 1px solid #ddd; border-radius: 12px;
@@ -91,10 +100,11 @@
   }
   .filter-dropdown.open { display: block; }
   .filter-dropdown h4 { font-size: 13px; color: #888; margin-bottom: 10px; }
-  .filter-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; font-size: 15px; }
+  .filter-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 15px; }
   .filter-item input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: #1a73e8; }
   .filter-clear { margin-top: 10px; width: 100%; padding: 8px; background: #f0f2f5; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; color: #555; }
 
+  /* ── גריד מוצרים ── */
   #grid {
     display: grid; grid-template-columns: 1fr;
     gap: 12px; padding: 8px 16px 100px;
@@ -103,12 +113,13 @@
   @media (min-width: 600px) { #grid { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 900px) { #grid { grid-template-columns: repeat(3, 1fr); } }
 
+  /* ── כרטיס מוצר ── */
   .card {
     background: white; border-radius: 14px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     display: flex; flex-direction: column; overflow: hidden;
     direction: ltr; transition: box-shadow 0.2s, opacity 0.2s;
-    border: 2px solid transparent;
+    border: 2px solid transparent; cursor: pointer;
   }
   .card.selected { box-shadow: 0 4px 16px rgba(26,115,232,0.25); }
   .card.out-of-stock { opacity: 0.45; pointer-events: none; }
@@ -122,6 +133,8 @@
   .card-stock { font-size: 12px; color: #555; margin-top: 2px; }
   .card-stock span { font-weight: bold; color: #333; }
   .card-footer { padding: 0 14px 14px; }
+
+  /* ── כפתור הוסף לעגלה ── */
   .btn-add {
     width: 100%; padding: 10px; border: none; border-radius: 10px;
     font-size: 14px; font-weight: bold; cursor: pointer;
@@ -129,8 +142,11 @@
     transition: background 0.15s;
   }
 
+  /* ── Overlay (רקע כהה) ── */
   .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: flex-end; justify-content: center; }
   .overlay.open { display: flex; }
+
+  /* ── Sheet (פאנל תחתון) ── */
   .sheet {
     background: white; border-radius: 20px 20px 0 0;
     width: 100%; max-width: 960px; max-height: 95vh;
@@ -141,6 +157,8 @@
   .sheet-header h3 { font-size: 18px; }
   .sheet-header p { font-size: 13px; color: #888; margin-top: 4px; }
   .sheet-body { flex: 1; overflow-y: auto; padding: 12px 20px; -webkit-overflow-scrolling: touch; }
+
+  /* ── פריט בעגלה ── */
   .cart-item { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
   .cart-item:last-child { border-bottom: none; }
   .cart-item-img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: #f5f5f5; flex-shrink: 0; }
@@ -148,13 +166,15 @@
   .cart-item-info { flex: 1; }
   .cart-item-name { font-size: 14px; font-weight: bold; line-height: 1.3; }
   .cart-item-sku { font-size: 11px; color: #888; margin-top: 2px; }
-  .cart-item-price { font-size: 12px; color: #1a73e8; margin-top: 2px; }
+  .cart-item-price { font-size: 12px; margin-top: 2px; }
   .cart-qty-control { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
   .qty-btn { width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 6px; background: white; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #555; }
   .qty-val { font-size: 15px; font-weight: bold; min-width: 20px; text-align: center; }
   .cart-item-remove { padding: 6px; color: #ccc; cursor: pointer; font-size: 18px; }
   .cart-note { margin-top: 8px; }
   .cart-note textarea { width: 100%; padding: 8px 10px; border: 1px solid #eee; border-radius: 8px; font-size: 13px; resize: none; height: 52px; direction: rtl; color: #555; }
+
+  /* ── footer של sheet (סה"כ + כפתורים) ── */
   .sheet-footer { padding: 16px 20px; border-top: 1px solid #eee; }
   .sheet-total { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 15px; }
   .sheet-total span:last-child { font-weight: bold; font-size: 17px; }
@@ -165,8 +185,10 @@
   .btn-send:disabled { background: #90b8f0; }
   .empty-cart { text-align: center; padding: 32px; color: #aaa; font-size: 15px; }
 
+  /* ── Footer דף ── */
   footer { text-align: center; padding: 20px; color: #aaa; font-size: 12px; max-width: 960px; margin: 0 auto; }
 
+  /* ── כפתור צף (FAB) ── */
   .fab {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
     color: white; border: none; border-radius: 24px;
@@ -174,42 +196,32 @@
     cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
     display: flex; align-items: center; gap: 8px;
     z-index: 80; opacity: 0; pointer-events: none;
-    transition: opacity 0.25s; white-space: nowrap;
-    background: #1a73e8;
+    transition: opacity 0.25s; white-space: nowrap; background: #1a73e8;
   }
   .fab.visible { opacity: 1; pointer-events: auto; }
   .fab-badge { background: #e53935; color: white; border-radius: 10px; font-size: 12px; font-weight: bold; padding: 1px 7px; min-width: 20px; text-align: center; }
 
+  /* ── Toast הודעה ── */
   #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #323232; color: white; padding: 12px 24px; border-radius: 24px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; white-space: nowrap; }
   #toast.show { opacity: 1; }
   #loading { text-align: center; padding: 40px; color: #888; font-size: 15px; grid-column: 1/-1; }
- /* Product Detail Sheet */
+
+  /* ── תפריט פרטי מוצר ── */
   .product-sheet { direction: rtl; }
-  .product-sheet-img {
-    width: 100%; height: 220px; object-fit: contain;
-    background: #f8f9fa; border-radius: 0;
-  }
-  .product-sheet-img-placeholder {
-    width: 100%; height: 220px; background: #f0f2f5;
-    display: flex; align-items: center; justify-content: center;
-    color: #bbb; font-size: 14px;
-  }
+  .product-sheet-img { width: 100%; height: 220px; object-fit: contain; background: #f8f9fa; }
+  .product-sheet-img-placeholder { width: 100%; height: 220px; background: #f0f2f5; display: flex; align-items: center; justify-content: center; color: #bbb; font-size: 14px; }
   .product-sheet-body { padding: 20px; }
   .product-sheet-title { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
   .product-sheet-sku { font-size: 13px; color: #888; margin-bottom: 20px; }
-  .product-sheet-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 13px 0; border-bottom: 1px solid #f0f0f0; font-size: 15px;
-  }
+  .product-sheet-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 13px 0; border-bottom: 1px solid #f0f0f0; font-size: 15px; }
   .product-sheet-row:last-of-type { border-bottom: none; }
   .product-sheet-label { color: #888; font-size: 14px; flex-shrink: 0; margin-left: 12px; }
-  .product-sheet-value { font-weight: 500; text-align: left; word-break: break-word; }
-  .product-sheet-link { color: #1a73e8; text-decoration: none; font-size: 14px; word-break: break-all; }
+  .product-sheet-value { font-weight: 500; text-align: left; word-break: break-word; max-width: 60%; }
+  .product-sheet-link { color: #1a73e8; text-decoration: none; font-size: 14px; word-break: break-all; text-align: left; max-width: 60%; }
   .product-sheet-footer { padding: 16px 20px; border-top: 1px solid #eee; }
-  .product-sheet-footer button {
-    width: 100%; padding: 14px; border: none; border-radius: 12px;
-    font-size: 16px; font-weight: bold; cursor: pointer; color: white;
-  }
+  .product-sheet-footer button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; }
+
+  /* ── כפתור חזור ── */
   .sheet-back-btn {
     display: flex; align-items: center; gap: 8px;
     padding: 14px 20px; border-bottom: 1px solid #f0f0f0;
@@ -221,91 +233,114 @@
 </head>
 <body>
 
-<!-- מסך כניסה -->
+<!-- ═══════════════════════════════════════
+     מסך כניסה
+════════════════════════════════════════ -->
 <div id="login-screen">
   <div class="login-box">
     <div style="font-size:36px;margin-bottom:12px">🔐</div>
     <h2 id="login-title">Player 1</h2>
-    <p>הכנס קוד גישה</p>
-    <input type="password" id="pin-input" placeholder="••••" maxlength="8" onkeydown="if(event.key==='Enter')doLogin()">
-    <button onclick="doLogin()">כניסה</button>
-    <div class="login-error" id="login-error">קוד שגוי, נסה שוב</div>
+    <p>הכנס פרטי כניסה</p>
+    <!-- שדה שם משתמש -->
+    <input type="text" id="username-input" placeholder="שם משתמש" autocomplete="username">
+    <!-- שדה סיסמה -->
+    <input type="password" id="pin-input" placeholder="סיסמה" autocomplete="current-password"
+           onkeydown="if(event.key==='Enter')doLogin()">
+    <button id="login-btn" onclick="doLogin()">כניסה</button>
+    <div class="login-error" id="login-error">שם משתמש או סיסמה שגויים</div>
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     האפליקציה הראשית (מוסתרת עד לאחר login)
+════════════════════════════════════════ -->
 <div id="app" style="display:none">
 
-<header id="site-header">
-  <div class="header-inner" id="header-inner">
-    <img id="header-logo" class="header-logo" src="" style="display:none" onerror="this.style.display='none'">
-    <div class="header-title" id="header-title">📦 Sales Report</div>
-  </div>
-</header>
-
-<div class="toolbar" id="toolbar-sentinel">
-  <div class="toolbar-inner">
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="...חיפוש לפי שם או מק״ט" oninput="filterProducts()">
+  <!-- Header עם לוגו וכותרת -->
+  <header id="site-header">
+    <div class="header-inner" id="header-inner">
+      <img id="header-logo" class="header-logo" src="" style="display:none" onerror="this.style.display='none'">
+      <div class="header-title" id="header-title">📦 Sales Report</div>
     </div>
-    <button class="filter-btn" id="filterBtn" onclick="toggleFilter()">
-      <div class="filter-icon"><span></span><span></span><span></span></div>
-    </button>
-    <button class="cart-btn" id="cartBtn" onclick="openCart()">
-      🛒 דווח מכירה
-      <span class="cart-badge" id="cartBadge"></span>
-    </button>
-  </div>
-</div>
+  </header>
 
-<div class="filter-dropdown" id="filterDropdown">
-  <h4>סינון לפי קטגוריה</h4>
-  <div id="filterList"></div>
-  <button class="filter-clear" onclick="clearFilters()">נקה סינון</button>
-</div>
-
-<div id="grid"><div id="loading">טוען מוצרים...</div></div>
-
-<footer id="footer" style="display:none">
-  <a id="footer-link" href="#" target="_blank" style="color:#aaa"></a>
-</footer>
-
-<div class="overlay" id="cart-overlay">
-  <div class="sheet">
-    <div class="sheet-header">
-      <h3>🧾 סיכום מכירה</h3>
-      <p id="cart-subtitle">0 פריטים</p>
-    </div>
-    <div class="sheet-body" id="cart-body"></div>
-    <div class="sheet-footer">
-      <div class="sheet-total">
-        <span>סה"כ</span>
-        <span id="cart-total">₪0</span>
+  <!-- Toolbar – חיפוש, פילטר, כפתור דיווח -->
+  <div class="toolbar" id="toolbar-sentinel">
+    <div class="toolbar-inner">
+      <!-- שדה חיפוש -->
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="...חיפוש לפי שם או מק״ט" oninput="filterProducts()">
       </div>
-      <div class="sheet-btns">
-        <button class="btn-back" onclick="closeCart()">חזור→</button>
-        <button class="btn-send" id="send-btn" onclick="sendAll()">✓ שלח דיווח</button>
+      <!-- כפתור פילטר קטגוריות -->
+      <button class="filter-btn" id="filterBtn" onclick="toggleFilter()">
+        <div class="filter-icon"><span></span><span></span><span></span></div>
+      </button>
+      <!-- כפתור דווח מכירה -->
+      <button class="cart-btn" id="cartBtn" onclick="openCart()">
+        🛒 דווח מכירה
+        <span class="cart-badge" id="cartBadge"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- תפריט פילטר קטגוריות (נפתח בלחיצה) -->
+  <div class="filter-dropdown" id="filterDropdown">
+    <h4>סינון לפי קטגוריה</h4>
+    <div id="filterList"></div>
+    <button class="filter-clear" onclick="clearFilters()">נקה סינון</button>
+  </div>
+
+  <!-- גריד המוצרים -->
+  <div id="grid"><div id="loading">טוען מוצרים...</div></div>
+
+  <!-- Footer עם לינק לאתר -->
+  <footer id="footer" style="display:none">
+    <a id="footer-link" href="#" target="_blank" style="color:#aaa"></a>
+  </footer>
+
+  <!-- ── עגלת מכירה ── -->
+  <div class="overlay" id="cart-overlay">
+    <div class="sheet">
+      <div class="sheet-header">
+        <h3>🧾 סיכום מכירה</h3>
+        <p id="cart-subtitle">0 פריטים</p>
+      </div>
+      <div class="sheet-body" id="cart-body"></div>
+      <div class="sheet-footer">
+        <div class="sheet-total">
+          <span>סה"כ</span>
+          <span id="cart-total">₪0</span>
+        </div>
+        <div class="sheet-btns">
+          <button class="btn-back" onclick="closeCart()">חזור ←</button>
+          <button class="btn-send" id="send-btn" onclick="sendAll()">✓ שלח דיווח</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<button class="fab" id="fab" onclick="openCart()">
-  🛒 דווח מכירה
-  <span class="fab-badge" id="fabBadge">0</span>
-</button>
+  <!-- ── כפתור צף ── -->
+  <button class="fab" id="fab" onclick="openCart()">
+    🛒 דווח מכירה
+    <span class="fab-badge" id="fabBadge">0</span>
+  </button>
 
-</div><!-- end #app -->
+</div><!-- סוף #app -->
 
-<!-- Product Detail -->
+<!-- ── תפריט פרטי מוצר ── -->
 <div class="overlay" id="product-overlay">
   <div class="sheet product-sheet">
-    <button class="sheet-back-btn" onclick="closeProduct()">חזור→</button>
-    <div class="sheet-body" style="overflow-y:auto; -webkit-overflow-scrolling:touch;">
+    <!-- כפתור חזור -->
+    <button class="sheet-back-btn" onclick="closeProduct()">חזור ←</button>
+    <div class="sheet-body" style="overflow-y:auto;-webkit-overflow-scrolling:touch;">
+      <!-- תמונת מוצר -->
       <div id="product-img-wrap"></div>
       <div class="product-sheet-body">
+        <!-- שם ומק"ט -->
         <div class="product-sheet-title" id="pd-name"></div>
         <div class="product-sheet-sku" id="pd-sku"></div>
+        <!-- שורות פרטים -->
         <div class="product-sheet-row">
           <span class="product-sheet-label">מותג</span>
           <span class="product-sheet-value" id="pd-brand"></span>
@@ -322,166 +357,225 @@
           <span class="product-sheet-label">מלאי</span>
           <span class="product-sheet-value" id="pd-stock"></span>
         </div>
+        <!-- תיאור מוצר (מוסתר אם ריק) -->
         <div class="product-sheet-row" id="pd-desc-row">
           <span class="product-sheet-label">תיאור מוצר</span>
           <span class="product-sheet-value" id="pd-desc"></span>
         </div>
+        <!-- לינק לאתר יצרן (מוסתר אם ריק) -->
         <div class="product-sheet-row" id="pd-link-row">
           <span class="product-sheet-label">לינק לאתר היצרן</span>
           <a class="product-sheet-link" id="pd-link" href="#" target="_blank"></a>
         </div>
       </div>
     </div>
+    <!-- כפתור הוסף לעגלה -->
     <div class="product-sheet-footer">
       <button id="pd-add-btn" onclick="addFromDetail()"></button>
     </div>
   </div>
 </div>
- 
+
+<!-- Toast הודעות -->
 <div id="toast"></div>
 
 <script>
+  // ═══════════════════════════════════════
+  // הגדרות בסיסיות
+  // ═══════════════════════════════════════
+
+  /* כתובת ה-API של Apps Script */
   var API_URL = 'https://script.google.com/macros/s/AKfycbxwGAKJBnRYExNEFIRxEwQg2_wP0KaWs-nudTEU5G6Q7CP1I2htI0wFJVUWbTzYKR-R/exec';
 
-  // סיסמאות – CLIENT_PIN ללקוח, ADMIN_PIN לך
-  var CLIENT_PIN = '1234';
-  var ADMIN_PIN  = '9999';
+  /* Token סודי – חייב להיות זהה ל-SECRET_TOKEN ב-Code.gs */
+  var SECRET_TOKEN = 'tenam@player1-xyz-2025-abc';
 
-  var products = [];
-  var cart = {};
-  var headerColor = '#1a73e8';
+  var products        = [];
+  var cart            = {};
+  var headerColor     = '#1a73e8';
   var activeCategories = [];
-  var userRole = null;
+  var userRole        = null;
+  var selectedProduct = null;
 
-  // בדוק אם כבר מחובר
-  var savedRole = sessionStorage.getItem('role');
-  if (savedRole) {
-    userRole = savedRole;
-    startApp();
-  }
-
-  function doLogin() {
-    var pin = document.getElementById('pin-input').value;
-    if (pin === CLIENT_PIN) {
-      userRole = 'client';
-      sessionStorage.setItem('role', 'client');
+  // ═══════════════════════════════════════
+  // בדיקת session קיים בטעינה
+  // ═══════════════════════════════════════
+  (function checkSession() {
+    var savedRole = sessionStorage.getItem('role');
+    var savedToken = sessionStorage.getItem('token');
+    if (savedRole && savedToken) {
+      userRole = savedRole;
+      SECRET_TOKEN = savedToken;
       startApp();
-    } else if (pin === ADMIN_PIN) {
-      userRole = 'admin';
-      sessionStorage.setItem('role', 'admin');
-      startApp();
-    } else {
-      document.getElementById('login-error').style.display = 'block';
-      document.getElementById('pin-input').value = '';
     }
+  })();
+
+  // ═══════════════════════════════════════
+  // התחברות – שולח לשרת ומקבל role + token
+  // ═══════════════════════════════════════
+  function doLogin() {
+    var username = document.getElementById('username-input').value.trim();
+    var password = document.getElementById('pin-input').value.trim();
+    if (!username || !password) return;
+
+    var btn = document.getElementById('login-btn');
+    btn.textContent = 'מתחבר...';
+    btn.disabled = true;
+
+    fetch(API_URL + '?action=login&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+          userRole = data.role;
+          sessionStorage.setItem('role', data.role);
+          sessionStorage.setItem('token', data.token);
+          startApp();
+        } else {
+          document.getElementById('login-error').style.display = 'block';
+          btn.textContent = 'כניסה';
+          btn.disabled = false;
+        }
+      })
+      .catch(function() {
+        document.getElementById('login-error').textContent = 'שגיאת תקשורת, נסה שוב';
+        document.getElementById('login-error').style.display = 'block';
+        btn.textContent = 'כניסה';
+        btn.disabled = false;
+      });
   }
 
+  // ═══════════════════════════════════════
+  // הפעלת האפליקציה לאחר התחברות
+  // ═══════════════════════════════════════
   function startApp() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     loadProducts();
   }
 
+  // ═══════════════════════════════════════
+  // טעינת מוצרים מה-API
+  // ═══════════════════════════════════════
   function loadProducts() {
-    fetch(API_URL + '?action=getProducts')
+    fetch(API_URL + '?action=getProducts&token=' + encodeURIComponent(SECRET_TOKEN))
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        products = data.products || [];
-
-        if (data.header) {
-          var h = data.header;
-          document.getElementById('header-title').textContent = h.title || 'Sales Report';
-          if (h.color && h.color.trim()) headerColor = h.color.trim();
-          var inner = document.getElementById('header-inner');
-          inner.style.background = headerColor;
-          document.getElementById('fab').style.background = headerColor;
-          document.getElementById('send-btn').style.background = headerColor;
-          document.getElementById('login-screen').querySelector('button').style.background = headerColor;
-          if (h.logoUrl) {
-            var logo = document.getElementById('header-logo');
-            logo.src = h.logoUrl;
-            logo.style.display = 'block';
-          }
-          if (h.title) {
-            document.getElementById('login-title').textContent = h.title;
-            document.title = h.title;
-          }
-          if (h.siteUrl) {
-            document.getElementById('footer-link').href = h.siteUrl;
-            document.getElementById('footer-link').textContent = h.siteUrl;
-            document.getElementById('footer').style.display = 'block';
-          }
+        if (data.error === 'unauthorized') {
+          sessionStorage.clear();
+          location.reload();
+          return;
         }
-
-        var cats = {};
-        products.forEach(function(p) { cats[p.brand] = true; });
-        var list = document.getElementById('filterList');
-        list.innerHTML = '';
-        activeCategories = [];
-        Object.keys(cats).forEach(function(cat) {
-          activeCategories.push(cat);
-          var label = document.createElement('label');
-          label.className = 'filter-item';
-          label.innerHTML = '<input type="checkbox" checked value="' + cat + '" onchange="onFilterChange()"> ' + cat;
-          list.appendChild(label);
-        });
-
+        products = data.products || [];
+        applyHeader(data.header);
+        buildCategoryFilter();
         renderProducts(products);
       })
-      .catch(function(err) {
+      .catch(function() {
         document.getElementById('grid').innerHTML = '<div id="loading">שגיאה בטעינה, נסה לרענן</div>';
       });
   }
 
+  // ═══════════════════════════════════════
+  // החלת נתוני Header (כותרת, צבע, לוגו)
+  // ═══════════════════════════════════════
+  function applyHeader(h) {
+    if (!h) return;
+    if (h.title) {
+      document.getElementById('header-title').textContent = h.title;
+      document.getElementById('login-title').textContent  = h.title;
+      document.title = h.title;
+    }
+    if (h.color && h.color.trim()) {
+      headerColor = h.color.trim();
+      document.getElementById('header-inner').style.background = headerColor;
+      document.getElementById('fab').style.background           = headerColor;
+      document.getElementById('send-btn').style.background      = headerColor;
+    }
+    if (h.logoUrl) {
+      var logo = document.getElementById('header-logo');
+      logo.src = h.logoUrl;
+      logo.style.display = 'block';
+    }
+    if (h.siteUrl) {
+      document.getElementById('footer-link').href        = h.siteUrl;
+      document.getElementById('footer-link').textContent = h.siteUrl;
+      document.getElementById('footer').style.display    = 'block';
+    }
+  }
+
+  // ═══════════════════════════════════════
+  // בניית פילטר קטגוריות
+  // ═══════════════════════════════════════
+  function buildCategoryFilter() {
+    var cats = {};
+    products.forEach(function(p) { cats[p.brand] = true; });
+    var list = document.getElementById('filterList');
+    list.innerHTML = '';
+    activeCategories = [];
+    Object.keys(cats).forEach(function(cat) {
+      activeCategories.push(cat);
+      var label = document.createElement('label');
+      label.className = 'filter-item';
+      label.innerHTML = '<input type="checkbox" checked value="' + cat + '" onchange="onFilterChange()"> ' + cat;
+      list.appendChild(label);
+    });
+  }
+
+  // ═══════════════════════════════════════
+  // רינדור כרטיסי מוצרים
+  // ═══════════════════════════════════════
   function renderProducts(list) {
     var grid = document.getElementById('grid');
     if (list.length === 0) { grid.innerHTML = '<div id="loading">לא נמצאו מוצרים</div>'; return; }
     grid.innerHTML = '';
+
     list.forEach(function(p) {
       var outOfStock = p.stock <= 0;
-      var inCart = cart[p.sku] && cart[p.sku].qty > 0;
-      var qty = inCart ? cart[p.sku].qty : 0;
+      var inCart     = cart[p.sku] && cart[p.sku].qty > 0;
+      var qty        = inCart ? cart[p.sku].qty : 0;
 
+      /* תמונת מוצר */
       var imgHtml = p.imageUrl
         ? '<img class="card-img" src="' + p.imageUrl + '" onerror="this.outerHTML=\'<div class=card-img-placeholder>No Image</div>\'">'
         : '<div class="card-img-placeholder">No Image</div>';
 
+      /* כפתור הוסף / נוסף */
       var btnHtml = '';
       if (!outOfStock && !p.displayOnly) {
-        if (inCart) {
-          btnHtml = '<button class="btn-add" style="background:' + headerColor + ';color:white" onclick="addToCart(\'' + p.sku + '\')">' +
-                    '✓ נוסף (' + qty + ')</button>';
-        } else {
-          btnHtml = '<button class="btn-add" style="background:#eef3fd;color:' + headerColor + '" onclick="addToCart(\'' + p.sku + '\')">+ הוסף</button>';
-        }
+        btnHtml = inCart
+          ? '<button class="btn-add" style="background:' + headerColor + ';color:white" onclick="event.stopPropagation();addToCart(\'' + p.sku + '\')">' +
+            '✓ נוסף (' + qty + ')</button>'
+          : '<button class="btn-add" style="background:#eef3fd;color:' + headerColor + '" onclick="event.stopPropagation();addToCart(\'' + p.sku + '\')">+ הוסף</button>';
       }
 
       var card = document.createElement('div');
       card.className = 'card' + (outOfStock ? ' out-of-stock' : '') + (inCart ? ' selected' : '');
       card.id = 'card-' + p.sku;
       card.style.borderColor = inCart ? headerColor : 'transparent';
-      card.style.cursor = 'pointer';
-      card.querySelector && null;
-      card.addEventListener('click', function(e) {
-        if (e.target.closest('.btn-add')) return;
-        openProduct(p.sku);
-      });
+
+      /* לחיצה על הכרטיס פותחת פרטי מוצר */
+      card.addEventListener('click', function() { openProduct(p.sku); });
+
       card.innerHTML =
-        '<div onclick="openProduct(\'' + p.sku + '\')" style="cursor:pointer">' +
-          '<div class="card-body">' + imgHtml +
-            '<div class="card-info">' +
-              '<div class="card-price" style="color:' + headerColor + '">₪' + p.price + '</div>' +
-              '<div class="card-name">' + p.name + '</div>' +
-              '<div class="card-sku">' + p.sku + '</div>' +
-              '<div class="card-stock">Stock: <span>' + p.stock + '</span></div>' +
-            '</div>' +
+        '<div class="card-body">' + imgHtml +
+          '<div class="card-info">' +
+            '<div class="card-price" style="color:' + headerColor + '">₪' + p.price + '</div>' +
+            '<div class="card-name">' + p.name + '</div>' +
+            '<div class="card-sku">' + p.sku + '</div>' +
+            '<div class="card-stock">Stock: <span>' + p.stock + '</span></div>' +
           '</div>' +
         '</div>' +
         '<div class="card-footer">' + btnHtml + '</div>';
+
       grid.appendChild(card);
     });
   }
 
+  // ═══════════════════════════════════════
+  // פעולות עגלה
+  // ═══════════════════════════════════════
+
+  /* הוספת מוצר לעגלה */
   function addToCart(sku) {
     if (!cart[sku]) cart[sku] = { qty: 0, note: '' };
     cart[sku].qty += 1;
@@ -491,10 +585,11 @@
     card.classList.add('selected');
     card.style.borderColor = headerColor;
     card.querySelector('.card-footer').innerHTML =
-      '<button class="btn-add" style="background:' + headerColor + ';color:white" onclick="addToCart(\'' + sku + '\')">' +
+      '<button class="btn-add" style="background:' + headerColor + ';color:white" onclick="event.stopPropagation();addToCart(\'' + sku + '\')">' +
       '✓ נוסף (' + cart[sku].qty + ')</button>';
   }
 
+  /* עדכון badge מונה בטולבר ובFAB */
   function updateCartBadge() {
     var total = Object.keys(cart).reduce(function(s, k) { return s + cart[k].qty; }, 0);
     var badge = document.getElementById('cartBadge');
@@ -506,28 +601,32 @@
     if (fb) fb.textContent = total;
   }
 
-  function openCart() { renderCart(); document.getElementById('cart-overlay').classList.add('open'); }
+  function openCart()  { renderCart(); document.getElementById('cart-overlay').classList.add('open'); }
   function closeCart() { document.getElementById('cart-overlay').classList.remove('open'); }
 
+  /* רינדור תוכן העגלה */
   function renderCart() {
     var body  = document.getElementById('cart-body');
     var items = Object.keys(cart).filter(function(s) { return cart[s].qty > 0; });
     if (items.length === 0) {
       body.innerHTML = '<div class="empty-cart">העגלה ריקה</div>';
       document.getElementById('cart-subtitle').textContent = '0 פריטים';
-      document.getElementById('cart-total').textContent = '₪0';
+      document.getElementById('cart-total').textContent    = '₪0';
       return;
     }
     document.getElementById('cart-subtitle').textContent = items.length + ' פריטים';
     body.innerHTML = '';
     var grandTotal = 0;
+
     items.forEach(function(sku) {
       var p = products.find(function(x) { return x.sku === sku; });
       if (!p) return;
       grandTotal += cart[sku].qty * p.price;
+
       var imgHtml = p.imageUrl
         ? '<img class="cart-item-img" src="' + p.imageUrl + '" onerror="this.outerHTML=\'<div class=cart-item-img-placeholder>—</div>\'">'
         : '<div class="cart-item-img-placeholder">—</div>';
+
       var row = document.createElement('div');
       row.className = 'cart-item';
       row.innerHTML = imgHtml +
@@ -548,6 +647,7 @@
     document.getElementById('cart-total').textContent = '₪' + grandTotal.toLocaleString();
   }
 
+  /* שינוי כמות בעגלה */
   function changeQty(sku, delta) {
     if (!cart[sku]) return;
     cart[sku].qty = Math.max(0, cart[sku].qty + delta);
@@ -556,13 +656,14 @@
     updateTotals();
     var card = document.getElementById('card-' + sku);
     if (card) card.querySelector('.card-footer').innerHTML =
-      '<button class="btn-add" style="background:' + headerColor + ';color:white" onclick="addToCart(\'' + sku + '\')">' +
+      '<button class="btn-add" style="background:' + headerColor + ';color:white" onclick="event.stopPropagation();addToCart(\'' + sku + '\')">' +
       '✓ נוסף (' + cart[sku].qty + ')</button>';
     updateCartBadge();
   }
 
   function setNote(sku, val) { if (cart[sku]) cart[sku].note = val; }
 
+  /* הסרת מוצר מהעגלה */
   function removeFromCart(sku) {
     delete cart[sku];
     updateCartBadge();
@@ -571,11 +672,12 @@
       card.classList.remove('selected');
       card.style.borderColor = 'transparent';
       card.querySelector('.card-footer').innerHTML =
-        '<button class="btn-add" style="background:#eef3fd;color:' + headerColor + '" onclick="addToCart(\'' + sku + '\')">+ הוסף</button>';
+        '<button class="btn-add" style="background:#eef3fd;color:' + headerColor + '" onclick="event.stopPropagation();addToCart(\'' + sku + '\')">+ הוסף</button>';
     }
     renderCart();
   }
 
+  /* עדכון סיכום מחיר בעגלה */
   function updateTotals() {
     var items = Object.keys(cart).filter(function(s) { return cart[s].qty > 0; });
     var grandTotal = 0;
@@ -583,47 +685,77 @@
       var p = products.find(function(x) { return x.sku === sku; });
       if (p) grandTotal += cart[sku].qty * p.price;
     });
-    document.getElementById('cart-total').textContent = '₪' + grandTotal.toLocaleString();
+    document.getElementById('cart-total').textContent    = '₪' + grandTotal.toLocaleString();
     document.getElementById('cart-subtitle').textContent = items.length + ' פריטים';
   }
 
+  // ═══════════════════════════════════════
+  // שליחת דיווח מכירה
+  // ═══════════════════════════════════════
   function sendAll() {
     var items = Object.keys(cart).filter(function(s) { return cart[s].qty > 0; });
     if (items.length === 0) return;
+
     var btn = document.getElementById('send-btn');
-    btn.disabled = true;
+    btn.disabled    = true;
     btn.textContent = 'שולח...';
-    var calls = items.length;
-    var done = 0;
+
+    var calls    = items.length;
+    var done     = 0;
+    var cartCopy = JSON.parse(JSON.stringify(cart)); /* שמור עותק לפני ניקוי */
+
     items.forEach(function(sku) {
       var p = products.find(function(x) { return x.sku === sku; });
       fetch(API_URL, {
         method: 'POST',
-        body: JSON.stringify({ sku: sku, productName: p ? p.name : sku, quantity: cart[sku].qty, note: cart[sku].note })
+        body: JSON.stringify({
+          token:       SECRET_TOKEN,
+          sku:         sku,
+          productName: p ? p.name : sku,
+          quantity:    cartCopy[sku].qty,
+          note:        cartCopy[sku].note || ''
+        })
       }).then(function() {
         done++;
         if (done === calls) {
+          /* עדכון מלאי מקומי מיידי */
+          items.forEach(function(s) {
+            var prod = products.find(function(x) { return x.sku === s; });
+            if (prod) prod.stock = Math.max(0, prod.stock - cartCopy[s].qty);
+          });
           cart = {};
           updateCartBadge();
           closeCart();
+          renderProducts(products);
           showToast('✓ ' + calls + ' פריטים דווחו בהצלחה');
-          btn.disabled = false;
+          btn.disabled    = false;
           btn.textContent = '✓ שלח דיווח';
           btn.style.background = headerColor;
-          loadProducts();
+          /* רענון מהשרת ברקע אחרי 3 שניות */
+          setTimeout(loadProducts, 3000);
+        }
+      }).catch(function() {
+        done++;
+        if (done === calls) {
+          showToast('⚠️ שגיאה בשליחה, נסה שוב');
+          btn.disabled    = false;
+          btn.textContent = '✓ שלח דיווח';
         }
       });
     });
   }
 
+  // ═══════════════════════════════════════
+  // פילטר וחיפוש
+  // ═══════════════════════════════════════
   function toggleFilter() {
-    var dd = document.getElementById('filterDropdown');
+    var dd  = document.getElementById('filterDropdown');
     var btn = document.getElementById('filterBtn');
     dd.classList.toggle('open');
     btn.classList.toggle('active');
     if (dd.classList.contains('open')) {
       var rect = btn.getBoundingClientRect();
-      dd.style.top  = (rect.bottom + window.scrollY + 6) + 'px';
+      dd.style.top   = (rect.bottom + window.scrollY + 6) + 'px';
       dd.style.right = (window.innerWidth - rect.right) + 'px';
     }
   }
@@ -650,78 +782,53 @@
     renderProducts(filtered);
   }
 
-  function showToast(msg) {
-    var t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(function() { t.classList.remove('show'); }, 3000);
-  }
-
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('#filterDropdown') && !e.target.closest('#filterBtn')) {
-      document.getElementById('filterDropdown').classList.remove('open');
-    }
-  });
-
-  // FAB
-  var fab = document.getElementById('fab');
-  window.addEventListener('scroll', function() {
-    var sentinel = document.getElementById('toolbar-sentinel');
-    if (!sentinel) return;
-    fab.classList.toggle('visible', sentinel.getBoundingClientRect().bottom < 0);
-  }, { passive: true });
-
- var selectedProduct = null;
-
+  // ═══════════════════════════════════════
+  // תפריט פרטי מוצר
+  // ═══════════════════════════════════════
   function openProduct(sku) {
     var p = products.find(function(x) { return x.sku === sku; });
     if (!p) return;
     selectedProduct = p;
 
-    // תמונה
-    var imgWrap = document.getElementById('product-img-wrap');
-    imgWrap.innerHTML = p.imageUrl
+    /* תמונה */
+    document.getElementById('product-img-wrap').innerHTML = p.imageUrl
       ? '<img class="product-sheet-img" src="' + p.imageUrl + '" onerror="this.outerHTML=\'<div class=product-sheet-img-placeholder>No Image</div>\'">'
       : '<div class="product-sheet-img-placeholder">No Image</div>';
 
-    document.getElementById('pd-name').textContent  = p.name;
-    document.getElementById('pd-sku').textContent   = p.sku;
-    document.getElementById('pd-brand').textContent = p.brand || '—';
-    document.getElementById('pd-price-retail').textContent   = p.retailPrice ? '₪' + p.retailPrice : '—';
-    document.getElementById('pd-price-consumer').textContent = p.price ? '₪' + p.price : '—';
-    document.getElementById('pd-stock').textContent = p.stock;
+    document.getElementById('pd-name').textContent          = p.name;
+    document.getElementById('pd-sku').textContent           = p.sku;
+    document.getElementById('pd-brand').textContent         = p.brand   || '—';
+    document.getElementById('pd-price-retail').textContent  = p.retailPrice ? '₪' + p.retailPrice : '—';
+    document.getElementById('pd-price-consumer').textContent = p.price  ? '₪' + p.price : '—';
+    document.getElementById('pd-stock').textContent         = p.stock;
 
+    /* תיאור */
     var descRow = document.getElementById('pd-desc-row');
-    if (p.description) {
-      document.getElementById('pd-desc').textContent = p.description;
-      descRow.style.display = 'flex';
-    } else {
-      descRow.style.display = 'none';
-    }
+    descRow.style.display = p.description ? 'flex' : 'none';
+    document.getElementById('pd-desc').textContent = p.description || '';
 
+    /* לינק */
     var linkRow = document.getElementById('pd-link-row');
-    if (p.siteUrl) {
-      document.getElementById('pd-link').href        = p.siteUrl;
-      document.getElementById('pd-link').textContent = p.siteUrl;
-      linkRow.style.display = 'flex';
-    } else {
-      linkRow.style.display = 'none';
-    }
+    linkRow.style.display = p.siteUrl ? 'flex' : 'none';
+    document.getElementById('pd-link').href        = p.siteUrl || '#';
+    document.getElementById('pd-link').textContent = p.siteUrl || '';
 
-    // כפתור הוסף / כבר בעגלה
+    /* כפתור הוסף */
     var addBtn = document.getElementById('pd-add-btn');
     addBtn.style.background = headerColor;
-    var inCart = cart[p.sku] && cart[p.sku].qty > 0;
     if (p.stock <= 0 || p.displayOnly) {
       addBtn.style.display = 'none';
     } else {
       addBtn.style.display = 'block';
-      addBtn.textContent = inCart ? '✓ נוסף לעגלה (' + cart[p.sku].qty + ') — הוסף עוד' : '+ הוסף לעגלה';
+      var inCart = cart[p.sku] && cart[p.sku].qty > 0;
+      addBtn.textContent = inCart
+        ? '✓ נוסף לעגלה (' + cart[p.sku].qty + ') — הוסף עוד'
+        : '+ הוסף לעגלה';
     }
 
+    /* פתח ואפס גלילה */
     var overlay = document.getElementById('product-overlay');
     overlay.classList.add('open');
-    // איפוס גלילה לראש
     var body = overlay.querySelector('.sheet-body');
     if (body) body.scrollTop = 0;
   }
@@ -737,6 +844,33 @@
     var addBtn = document.getElementById('pd-add-btn');
     addBtn.textContent = '✓ נוסף לעגלה (' + cart[selectedProduct.sku].qty + ') — הוסף עוד';
   }
+
+  // ═══════════════════════════════════════
+  // Toast הודעה
+  // ═══════════════════════════════════════
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3000);
+  }
+
+  /* סגירת פילטר בלחיצה מחוץ */
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#filterDropdown') && !e.target.closest('#filterBtn')) {
+      document.getElementById('filterDropdown').classList.remove('open');
+    }
+  });
+
+  // ═══════════════════════════════════════
+  // FAB – מופיע כשהטולבר יוצא מהמסך
+  // ═══════════════════════════════════════
+  var fab = document.getElementById('fab');
+  window.addEventListener('scroll', function() {
+    var sentinel = document.getElementById('toolbar-sentinel');
+    if (!sentinel) return;
+    fab.classList.toggle('visible', sentinel.getBoundingClientRect().bottom < 0);
+  }, { passive: true });
 </script>
 </body>
 </html>
