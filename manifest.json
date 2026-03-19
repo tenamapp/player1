@@ -1,22 +1,226 @@
-{
-  "name": "Player 1 - מכר",
-  "short_name": "Player 1",
-  "description": "מערכת דיווח מכירות",
-  "start_url": "/player1/",
-  "display": "standalone",
-  "background_color": "#e8eaed",
-  "theme_color": "#1a73e8",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "https://via.placeholder.com/192x192/1a73e8/ffffff?text=P1",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://via.placeholder.com/512x512/1a73e8/ffffff?text=P1",
-      "sizes": "512x512",
-      "type": "image/png"
+// ─────────────────────────────────────────
+// קבוע סודי לאימות בקשות מה-frontend
+// שנה את הערך הזה למשהו אקראי משלך
+// ─────────────────────────────────────────
+var SECRET_TOKEN = 'tenam@player1-xyz-2025-abc';
+
+// ─────────────────────────────────────────
+// נקודת כניסה ראשית – GET
+// ─────────────────────────────────────────
+function doGet(e) {
+  var action   = e && e.parameter && e.parameter.action;
+  var token    = e && e.parameter && e.parameter.token;
+  var result;
+
+  try {
+    if (action === 'login') {
+      // לא דורש token – זו פעולת ההתחברות עצמה
+      result = handleLogin(
+        e.parameter.username || '',
+        e.parameter.password || ''
+      );
+    } else if (action === 'getProducts') {
+      if (!validateToken(token)) {
+        result = { error: 'unauthorized' };
+      } else {
+        result = getProducts();
+      }
+    } else {
+      result = { error: 'unknown action' };
     }
-  ]
+  } catch(err) {
+    result = { error: err.toString() };
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ─────────────────────────────────────────
+// נקודת כניסה ראשית – POST (דיווח מכירה)
+// ─────────────────────────────────────────
+function doPost(e) {
+  try {
+    var data  = JSON.parse(e.postData.contents);
+    var token = data.token || '';
+
+    if (!validateToken(token)) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ERROR', message: 'unauthorized' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var result = reportSale(data.sku, data.productName, data.quantity, data.note);
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'OK' }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ERROR', message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ─────────────────────────────────────────
+// אימות token
+// ─────────────────────────────────────────
+function validateToken(token) {
+  return token === SECRET_TOKEN;
+}
+
+// ─────────────────────────────────────────
+// התחברות – בודק מול טאב משתמשים
+// ─────────────────────────────────────────
+function handleLogin(username, password) {
+  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('משתמשים');
+  if (!sheet) return { success: false, message: 'טאב משתמשים לא נמצא' };
+
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    var rowName = String(data[i][0] || '').trim();
+    var rowPass = String(data[i][1] || '').trim();
+    var rowRole = String(data[i][2] || '').trim();
+
+    if (rowName === username.trim() && rowPass === password.trim()) {
+      return {
+        success: true,
+        role:    rowRole,
+        name:    rowName,
+        token:   SECRET_TOKEN
+      };
+    }
+  }
+  return { success: false, message: 'שם משתמש או סיסמה שגויים' };
+}
+
+// ─────────────────────────────────────────
+// שליפת מוצרים עם Cache
+// ─────────────────────────────────────────
+function getProducts() {
+  var cache  = CacheService.getScriptCache();
+  var cached = cache.get('products_data');
+  if (cached) return JSON.parse(cached);
+
+  var ss             = SpreadsheetApp.getActiveSpreadsheet();
+  var inventorySheet = ss.getSheetByName('שחקן 1 - מלאי');
+  var incomingSheet  = ss.getSheetByName('שחקן 1 - סחורה נכנסת');
+
+  if (!inventorySheet) return { header: null, products: [] };
+
+  var inventoryData = inventorySheet.getDataRange().getValues();
+  var displayOnly   = {};
+
+  if (incomingSheet) {
+    var incomingData = incomingSheet.getDataRange().getValues();
+    for (var r = 1; r < incomingData.length; r++) {
+      var skuIn  = String(incomingData[r][1] || '').trim();
+      var noteIn = String(incomingData[r][5] || '').trim();
+      if (noteIn === 'תצוגה') displayOnly[skuIn] = true;
+    }
+  }
+
+  var products   = [];
+  var headerData = null;
+
+  for (var i = 1; i < inventoryData.length; i++) {
+    var sku = String(inventoryData[i][0] || '').trim();
+    if (!sku) continue;
+
+    var imageVal = inventoryData[i][6];
+    var imageUrl = typeof imageVal === 'string' ? imageVal.trim() : '';
+
+    if (sku.toLowerCase() === 'header') {
+      headerData = {
+        title:   String(inventoryData[i][1] || 'דיווח מכירות'),
+        color:   String(inventoryData[i][2] || '#1a73e8').trim(),
+        logoUrl: imageUrl,
+        siteUrl: String(inventoryData[i][8] || '')
+      };
+      continue;
+    }
+
+    var stock    = Number(inventoryData[i][5]) || 0;
+    var category = inventoryData[i][2] ? String(inventoryData[i][2]).trim() : 'כללי';
+
+    products.push({
+      sku:         sku,
+      name:        String(inventoryData[i][1] || ''),
+      brand:       category,
+      price:       inventoryData[i][4] || 0,
+      retailPrice: inventoryData[i][3] || 0,
+      stock:       stock,
+      imageUrl:    imageUrl,
+      description: String(inventoryData[i][7] || ''),
+      siteUrl:     String(inventoryData[i][8] || ''),
+      displayOnly: !!displayOnly[sku]
+    });
+  }
+
+  var result = { header: headerData, products: products };
+  cache.put('products_data', JSON.stringify(result), 300);
+  return result;
+}
+
+// ─────────────────────────────────────────
+// דיווח מכירה + ניקוי Cache + מייל
+// ─────────────────────────────────────────
+function reportSale(sku, productName, quantity, note) {
+  var ss        = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet     = ss.getSheetByName('שחקן 1 - מכירות');
+  var now       = new Date();
+  var timestamp = Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm');
+
+  sheet.appendRow([timestamp, productName, sku, quantity, '', note || '']);
+
+  // נקה cache כדי שהמלאי יתעדכן בטעינה הבאה
+  CacheService.getScriptCache().remove('products_data');
+
+  // שלח מייל
+  try {
+    var inventorySheet = ss.getSheetByName('שחקן 1 - מלאי');
+    var data           = inventorySheet.getDataRange().getValues();
+    var price          = 0;
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === String(sku).trim()) {
+        price = data[i][4] || 0;
+        break;
+      }
+    }
+    var total     = price * quantity;
+    var recipient = Session.getActiveUser().getEmail();
+    var subject   = '🛒 מכירה חדשה – ' + productName;
+    var body =
+      'שלום,\n\nהתקבל דיווח מכירה חדש:\n\n' +
+      'מוצר:  ' + productName + '\n' +
+      'מק"ט:  ' + sku + '\n' +
+      'כמות:  ' + quantity + '\n' +
+      'מחיר:  ₪' + price + ' ליח\'\n' +
+      'סה"כ:  ₪' + total + '\n' +
+      (note ? 'הערה:  ' + note + '\n' : '') +
+      'תאריך: ' + timestamp + '\n\nבברכה,\nמערכת דיווח מכירות';
+    GmailApp.sendEmail(recipient, subject, body);
+  } catch(mailErr) {
+    Logger.log('Mail error: ' + mailErr.toString());
+  }
+
+  return 'OK';
+}
+
+// ─────────────────────────────────────────
+// פונקציית עזר – משיכת תמונה מ-OG tag
+// ─────────────────────────────────────────
+function GET_OG_IMAGE(url) {
+  if (!url) return '';
+  try {
+    var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    var html     = response.getContentText();
+    var match    = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+                || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+    return match ? match[1] : '';
+  } catch(e) {
+    return '';
+  }
 }
