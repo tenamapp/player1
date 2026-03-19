@@ -385,7 +385,7 @@
   // ═══════════════════════════════════════
 
   /* כתובת ה-API של Apps Script */
-  var API_URL = 'https://script.google.com/macros/s/AKfycbxwGAKJBnRYExNEFIRxEwQg2_wP0KaWs-nudTEU5G6Q7CP1I2htI0wFJVUWbTzYKR-R/exec';
+  var API_URL = 'https://script.google.com/macros/s/AKfycbww20VYHmG_w8NZyqISbiqRDScUNld7_XPPnJUGC8hBHkaSi1ri0ME4dxrp3avNmLic/exec';
 
   /* Token סודי – חייב להיות זהה ל-SECRET_TOKEN ב-Code.gs */
   var SECRET_TOKEN = 'tenam@player1-xyz-2025-abc';
@@ -427,8 +427,9 @@
       .then(function(data) {
         if (data.success) {
           userRole = data.role;
-          sessionStorage.setItem('role', data.role);
-          sessionStorage.setItem('token', data.token);
+          sessionStorage.setItem('role',     data.role);
+          sessionStorage.setItem('token',    data.token);
+          sessionStorage.setItem('username', data.username || '');
           startApp();
         } else {
           document.getElementById('login-error').style.display = 'block';
@@ -713,7 +714,8 @@
           sku:         sku,
           productName: p ? p.name : sku,
           quantity:    cartCopy[sku].qty,
-          note:        cartCopy[sku].note || ''
+          note:        cartCopy[sku].note || '',
+          username:    sessionStorage.getItem('username') || ''
         })
       }).then(function() {
         done++;
