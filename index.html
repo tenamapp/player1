@@ -152,9 +152,11 @@
   /* ── Sheet (פאנל תחתון) ── */
   .sheet {
     background: white; border-radius: 20px 20px 0 0;
-    width: 100%; max-width: 960px; max-height: 95vh;
+    width: 100%; max-width: 960px; max-height: 92vh;
     display: flex; flex-direction: column; direction: rtl;
     padding-bottom: env(safe-area-inset-bottom);
+    margin-top: env(safe-area-inset-top);
+  }
   }
   .sheet-header { padding: 20px 20px 12px; border-bottom: 1px solid #eee; }
   .sheet-header h3 { font-size: 18px; }
@@ -605,7 +607,7 @@
     if (fb) fb.textContent = total;
   }
 
-  function openCart()  { renderCart(); document.getElementById('cart-overlay').classList.add('open'); }
+  function openCart()  { renderCart(); document.getElementById('cart-overlay').classList.add('open'); pushHistory('cart'); }
   function closeCart() { document.getElementById('cart-overlay').classList.remove('open'); }
 
   /* רינדור תוכן העגלה */
@@ -834,6 +836,7 @@
     /* פתח ואפס גלילה */
     var overlay = document.getElementById('product-overlay');
     overlay.classList.add('open');
+    pushHistory('product');
     var body = overlay.querySelector('.sheet-body');
     if (body) body.scrollTop = 0;
   }
@@ -876,6 +879,28 @@
     if (!sentinel) return;
     fab.classList.toggle('visible', sentinel.getBoundingClientRect().bottom < 0);
   }, { passive: true });
+  // ═══════════════════════════════════════
+  // ניהול כפתור חזור של הטלפון
+  // ═══════════════════════════════════════
+  function pushHistory(state) {
+    history.pushState({ overlay: state }, '');
+  }
+
+  window.addEventListener('popstate', function(e) {
+    // אם יש overlay פתוח – סגור אותו במקום לצאת
+    if (document.getElementById('product-overlay').classList.contains('open')) {
+      closeProduct(); return;
+    }
+    if (document.getElementById('cart-overlay').classList.contains('open')) {
+      closeCart(); return;
+    }
+    if (document.getElementById('filterDropdown').classList.contains('open')) {
+      document.getElementById('filterDropdown').classList.remove('open');
+      document.getElementById('filterBtn').classList.remove('active');
+      return;
+    }
+    // אם אין כלום פתוח – תן לדפדפן לנהל
+  });
 </script>
 </body>
 </html>
