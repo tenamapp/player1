@@ -26,9 +26,12 @@
   .login-box input {
     width: 100%; padding: 12px 16px; border: 1px solid #ddd;
     border-radius: 10px; font-size: 16px; margin-bottom: 8px;
-    text-align: right; direction: rtl;
+    text-align: right; direction: rtl; text-align: right;
   }
-  .login-box input[type=password] { letter-spacing: normal; text-align: center; }
+  .login-box input[type=password] {
+    letter-spacing: normal; direction: rtl; text-align: right;
+  }
+  .login-box input::placeholder { text-align: right; direction: rtl; }
   .login-box button {
     width: 100%; padding: 13px; border: none; border-radius: 10px;
     background: #1a73e8; color: white; font-size: 16px;
