@@ -4,10 +4,8 @@
   "description": "מערכת דיווח מכירות",
   "start_url": "/player1/",
   "display": "standalone",
-  "background_color": "
-#e8eaed",
-  "theme_color": "
-#1a73e8",
+  "background_color": "#e8eaed",
+  "theme_color": "#1a73e8",
   "orientation": "portrait",
   "icons": [
     {
