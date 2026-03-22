@@ -626,7 +626,7 @@
     if (items.length === 0) {
       body.innerHTML = '<div class="empty-cart">העגלה ריקה</div>';
       document.getElementById('cart-subtitle').textContent = '0 פריטים';
-      document.getElementById('cart-total').textContent    = '&#8362;0';
+      document.getElementById('cart-total').textContent = '₪0';
       return;
     }
     document.getElementById('cart-subtitle').textContent = items.length + ' פריטים';
@@ -656,7 +656,7 @@
         '<div class="cart-item-remove" onclick="removeFromCart(\'' + esc(sku) + '\')">&#10005;</div>';
       body.appendChild(row);
     });
-    document.getElementById('cart-total').textContent = '&#8362;' + grandTotal.toLocaleString();
+    document.getElementById('cart-total').textContent = '₪' + grandTotal.toLocaleString();
   }
 
   function changeQty(sku, delta) {
@@ -698,7 +698,7 @@
       var p = products.find(function(x) { return x.sku === sku; });
       if (p) grandTotal += cart[sku].qty * p.price;
     });
-    document.getElementById('cart-total').textContent    = '&#8362;' + grandTotal.toLocaleString();
+    document.getElementById('cart-total').textContent    = '₪' + grandTotal.toLocaleString();
     document.getElementById('cart-subtitle').textContent = items.length + ' פריטים';
   }
 
@@ -837,7 +837,7 @@
       addBtn.style.display = 'block';
       var inCart = cart[p.sku] && cart[p.sku].qty > 0;
       addBtn.textContent = inCart
-        ? '&#10003; נוסף לעגלה (' + cart[p.sku].qty + ') — הוסף עוד'
+        ? '✓ נוסף לעגלה (' + cart[p.sku].qty + ') — הוסף עוד'
         : '+ הוסף לעגלה';
     }
 
