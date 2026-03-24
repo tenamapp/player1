@@ -389,8 +389,6 @@
   // הגדרות בסיסיות
   // ═══════════════════════════════════════
   var API_URL = 'https://script.google.com/macros/s/AKfycbyW-ntOxu3l16w24ExrDQZ8jKkp1YxZaCA2DkcdIy6Ha_QJpPTfPtJooUXFNsACGvRR/exec';
-  var SECRET_TOKEN = 'tenam@player1-xyz-2025-abc';
-
   var products         = [];
   var cart             = {};
   var headerColor      = '#1a73e8';
@@ -424,8 +422,7 @@
     var savedRole  = sessionStorage.getItem('role');
     var savedToken = sessionStorage.getItem('token');
     if (savedRole && savedToken) {
-      userRole     = savedRole;
-      SECRET_TOKEN = savedToken;
+      userRole = savedRole;
       startApp();
     }
   })();
@@ -480,9 +477,11 @@
   // טעינת מוצרים
   // ═══════════════════════════════════════
   function loadProducts() {
-    fetch(API_URL + '?action=getProducts&token=' + encodeURIComponent(SECRET_TOKEN))
+    var currentToken = sessionStorage.getItem('token') || '';
+    fetch(API_URL + '?action=getProducts&token=' + encodeURIComponent(currentToken))
       .then(function(r) { return r.json(); })
       .then(function(data) {
+        if (data.token) sessionStorage.setItem('token', data.token);
         if (data.error === 'unauthorized') { sessionStorage.clear(); location.reload(); return; }
         products = data.products || [];
         applyHeader(data.header);
@@ -731,7 +730,7 @@
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
-          token:       SECRET_TOKEN,
+          token:       sessionStorage.getItem('token') || '',
           sku:         sku,
           productName: p ? p.name : sku,
           quantity:    cartCopy[sku].qty,
