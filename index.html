@@ -75,6 +75,7 @@
   .filter-icon span:nth-child(2) { width: 13px; }
   .filter-icon span:nth-child(3) { width: 8px; }
   .filter-btn.active .filter-icon span { background: #1a73e8; }
+  .filter-btn.active img { opacity: 1 !important; filter: invert(35%) sepia(90%) saturate(1500%) hue-rotate(200deg); }
 
   /* ── כפתור דווח מכירה בטולבר ── */
   .cart-btn {
@@ -306,6 +307,20 @@
   }
   .contact-btn.whatsapp { color: #25D366; background: #f0fff4; border-color: #b2dfdb; }
   .contact-btn.phone    { color: #1a73e8; background: #eef3fd; border-color: #c5d9f7; }
+
+  /* ── כפתור חזרה לראש ── */
+  .scroll-top-btn {
+    position: fixed; bottom: 24px; right: 16px;
+    width: 42px; height: 42px;
+    background: white; border: 1px solid #ddd;
+    border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    cursor: pointer; z-index: 79;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+    font-size: 18px; color: #555;
+  }
+  .scroll-top-btn.visible { opacity: 1; pointer-events: auto; }
 </style>
 </head>
 <body>
@@ -386,7 +401,7 @@
       </div>
       <!-- כפתור פילטר קטגוריות -->
       <button class="filter-btn" id="filterBtn" onclick="toggleFilter()">
-        <div class="filter-icon"><span></span><span></span><span></span></div>
+        <img src="https://cdn-icons-png.flaticon.com/512/107/107799.png" width="20" height="20" style="opacity:0.5;">
       </button>
       <!-- כפתור דווח מכירה -->
       <button class="cart-btn" id="cartBtn" onclick="openCart()">
@@ -511,6 +526,9 @@
   </div>
 </div>
 
+<!-- כפתור חזרה לראש העמוד -->
+<button class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+  
 <!-- Toast הודעות -->
 <div id="toast"></div>
 
@@ -1090,11 +1108,6 @@
         '<button class="menu-item" onclick="openAdminSection(\'stats\');closeMenu()">' +
           '<span class="menu-item-icon">📊</span>' +
           '<span class="menu-item-label">סטטיסטיקות</span>' +
-        '</button>' +
-        '<div class="menu-divider"></div>' +
-        '<button class="menu-item" onclick="openAdminSection(\'users\');closeMenu()">' +
-          '<span class="menu-item-icon">👥</span>' +
-          '<span class="menu-item-label">ניהול משתמשים</span>' +
         '</button>';
     }
   }
@@ -1111,6 +1124,12 @@
       closeMenu();
     }
   });
+
+  // ── כפתור חזרה לראש ──
+  var scrollTopBtn = document.getElementById('scrollTopBtn');
+  window.addEventListener('scroll', function() {
+    scrollTopBtn.classList.toggle('visible', window.scrollY > 300);
+  }, { passive: true });
 </script>
 </body>
 </html>
