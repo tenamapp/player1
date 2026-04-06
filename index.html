@@ -321,6 +321,40 @@
     font-size: 18px; color: #555;
   }
   .scroll-top-btn.visible { opacity: 1; pointer-events: auto; }
+
+  /* ── מחיר מבצע ── */
+  .card-price-original { 
+    text-decoration: line-through; 
+    color: #aaa; 
+    font-size: 12px; 
+    font-weight: normal;
+  }
+  .card-price-sale { 
+    color: #e53935; 
+    font-weight: bold; 
+    font-size: 13px; 
+  }
+  .product-price-original {
+    text-decoration: line-through;
+    color: #aaa;
+    font-size: 14px;
+    font-weight: normal;
+  }
+  .product-price-sale {
+    color: #e53935;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  .promo-badge {
+    display: inline-block;
+    background: #fce4e4;
+    color: #e53935;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-right: 6px;
+  }
 </style>
 </head>
 <body>
@@ -502,6 +536,19 @@
         <div class="product-sheet-row">
           <span class="product-sheet-label">מחיר מומלץ לצרכן <small style="color:#aaa;font-weight:normal">כולל מע"מ</small></span>
           <span class="product-sheet-value" id="pd-price-consumer"></span>
+        </div>
+        <!-- מחיר מבצע (מוסתר אם אין מבצע) -->
+        <div class="product-sheet-row" id="pd-promo-row" style="display:none">
+          <span class="product-sheet-label">
+            <span class="promo-badge">מבצע</span>
+            מחיר מבצע
+          </span>
+          <span class="product-sheet-value product-price-sale" id="pd-promo-price"></span>
+        </div>
+        <!-- תאריכי מבצע (מוסתר אם אין מבצע) -->
+        <div class="product-sheet-row" id="pd-promo-dates-row" style="display:none">
+          <span class="product-sheet-label">תאריך מבצע</span>
+          <span class="product-sheet-value" id="pd-promo-dates" style="color:#888;font-size:13px;"></span>
         </div>
         <div class="product-sheet-row">
           <span class="product-sheet-label">מלאי</span>
@@ -723,7 +770,13 @@
       card.innerHTML =
         '<div class="card-body">' + imgHtml +
           '<div class="card-info">' +
-            '<div class="card-price" style="color:' + esc(headerColor) + '">&#8362;' + esc(p.price) + '</div>' +
+            (p.salePrice
+              ? '<div class="card-price">' +
+                  '<span class="card-price-original">&#8362;' + esc(p.price) + '</span> ' +
+                  '<span class="card-price-sale">&#8362;' + esc(p.salePrice) + '</span>' +
+                '</div>'
+              : '<div class="card-price" style="color:' + esc(headerColor) + '">&#8362;' + esc(p.price) + '</div>'
+            ) +
             '<div class="card-name">'  + esc(p.name)  + '</div>' +
             '<div class="card-sku">'   + esc(p.sku)   + '</div>' +
             '<div class="card-stock">מלאי: <span>' + (p.stock <= 0 ? 'אזל' : esc(p.stock)) + '</span></div>' +
@@ -964,7 +1017,22 @@
     document.getElementById('pd-sku').textContent            = p.sku;
     document.getElementById('pd-brand').textContent          = p.brand || '—';
     document.getElementById('pd-price-retail').textContent   = p.retailPrice ? '&#8362;' + p.retailPrice : '—';
-    document.getElementById('pd-price-consumer').textContent = p.price ? '&#8362;' + p.price : '—';
+    var priceConsumerEl = document.getElementById('pd-price-consumer');
+    var promoDatesEl    = document.getElementById('pd-promo-dates-row');
+    var promoRowEl      = document.getElementById('pd-promo-row');
+
+    if (p.salePrice) {
+      priceConsumerEl.innerHTML =
+        '<span class="product-price-original">&#8362;' + esc(p.price) + '</span>';
+      promoRowEl.style.display  = 'flex';
+      document.getElementById('pd-promo-price').textContent = '₪' + p.salePrice;
+      promoDatesEl.style.display = 'flex';
+      document.getElementById('pd-promo-dates').textContent = p.promoStart + ' – ' + p.promoEnd;
+    } else {
+      priceConsumerEl.textContent = p.price ? '₪' + p.price : '—';
+      promoRowEl.style.display    = 'none';
+      promoDatesEl.style.display  = 'none';
+    }
     document.getElementById('pd-stock').textContent          = p.stock;
 
     var descRow = document.getElementById('pd-desc-row');
