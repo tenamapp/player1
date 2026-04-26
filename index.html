@@ -664,14 +664,14 @@
 <button class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <!-- ═══════════════════════════════════════
-     ממשק Admin – הכנסת סחורה נכנסת
+     ממשק Admin – דיווח סחורה נכנסת
 ════════════════════════════════════════ -->
 <div class="admin-overlay" id="admin-incoming-overlay">
   <div class="admin-sheet">
 
     <!-- כותרת -->
     <div class="admin-header">
-      <h3>📦 הכנסת סחורה נכנסת</h3>
+      <h3>📦 דיווח סחורה נכנסת</h3>
       <button class="admin-close" onclick="closeAdminIncoming()">✕</button>
     </div>
 
@@ -1321,7 +1321,7 @@
     if (role === 'admin') {
       var btnIncoming = document.createElement('button');
       btnIncoming.className = 'menu-item';
-      btnIncoming.innerHTML = '<span class="menu-item-icon">📦</span><span class="menu-item-label">הכנסת סחורה נכנסת</span>';
+      btnIncoming.innerHTML = '<span class="menu-item-icon">📦</span><span class="menu-item-label">דיווח סחורה נכנסת</span>';
       btnIncoming.addEventListener('click', function() { closeMenu(); openAdminIncoming(); });
       body.appendChild(btnIncoming);
     }
@@ -1361,7 +1361,7 @@
   }, { passive: true });
 
   // ═══════════════════════════════════════
-  // Admin – הכנסת סחורה נכנסת
+  // Admin – דיווח סחורה נכנסת
   // ═══════════════════════════════════════
   var incomingSelectedProduct = null;
 
