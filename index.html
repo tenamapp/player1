@@ -360,6 +360,225 @@
     border-radius: 20px;
     margin-right: 6px;
   }
+
+  /* ── ממשק Admin ── */
+  .admin-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 200;
+    align-items: flex-end; justify-content: center;
+  }
+  .admin-overlay.open { display: flex; }
+
+  .admin-sheet {
+    background: white; border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 960px; max-height: 92vh;
+    display: flex; flex-direction: column;
+    direction: rtl; padding-bottom: env(safe-area-inset-bottom);
+  }
+  .admin-header {
+    padding: 20px; border-bottom: 1px solid #eee;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .admin-header h3 { font-size: 18px; font-weight: bold; }
+  .admin-close {
+    background: none; border: none; font-size: 22px;
+    cursor: pointer; color: #888; padding: 4px 8px; border-radius: 6px;
+  }
+  .admin-body { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; }
+  .admin-footer { padding: 16px 20px; border-top: 1px solid #eee; flex-shrink: 0; }
+
+  /* שדות טופס */
+  .form-group { margin-bottom: 18px; }
+  .form-label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; font-weight: 500; }
+  .form-input {
+    width: 100%; padding: 11px 14px; border: 1px solid #ddd;
+    border-radius: 10px; font-size: 15px; direction: rtl;
+    background: white; transition: border-color 0.2s;
+  }
+  .form-input:focus { outline: none; border-color: #1a73e8; }
+  .form-input:disabled { background: #f8f9fa; color: #888; }
+
+  /* תוצאות חיפוש מוצר */
+  .product-search-results {
+    border: 1px solid #ddd; border-radius: 10px;
+    max-height: 200px; overflow-y: auto;
+    margin-top: 4px; display: none;
+  }
+  .product-search-results.open { display: block; }
+  .product-result-item {
+    padding: 12px 14px; cursor: pointer; border-bottom: 1px solid #f0f0f0;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 14px;
+  }
+  .product-result-item:last-child { border-bottom: none; }
+  .product-result-item:hover { background: #f8f9fa; }
+  .product-result-sku { color: #888; font-size: 12px; }
+  .product-selected {
+    background: #eef3fd; border-radius: 10px; padding: 12px 14px;
+    margin-bottom: 18px; display: none; direction: rtl;
+  }
+  .product-selected.show { display: block; }
+  .product-selected-name { font-weight: bold; font-size: 15px; }
+  .product-selected-info { font-size: 13px; color: #888; margin-top: 2px; }
+
+  /* כפתורי טופס */
+  .form-btns { display: flex; gap: 10px; }
+  .form-btns button { flex: 1; padding: 13px; border: none; border-radius: 12px; font-size: 15px; cursor: pointer; font-weight: bold; }
+  .form-btn-cancel { background: #f0f2f5; color: #555; }
+  .form-btn-submit { background: #1a73e8; color: white; }
+  .form-btn-submit:disabled { background: #90b8f0; }
+
+  /* הודעת הצלחה */
+  .form-success {
+    background: #e8f5e9; color: #2e7d32; border-radius: 10px;
+    padding: 12px 16px; font-size: 14px; margin-bottom: 16px;
+    display: none; text-align: center;
+  }
+  .form-success.show { display: block; }
+  .form-error {
+    background: #fce4e4; color: #c62828; border-radius: 10px;
+    padding: 12px 16px; font-size: 14px; margin-bottom: 16px;
+    display: none; text-align: center;
+  }
+  .form-error.show { display: block; }
+
+  // ═══════════════════════════════════════
+  // Admin – הכנסת סחורה נכנסת
+  // ═══════════════════════════════════════
+  var incomingSelectedProduct = null;
+
+  function openAdminIncoming() {
+    // אפס טופס
+    incomingSelectedProduct = null;
+    document.getElementById('incoming-search').value        = '';
+    document.getElementById('incoming-qty').value           = '';
+    document.getElementById('incoming-invoice').value       = '';
+    document.getElementById('incoming-note').value          = '';
+    document.getElementById('incoming-search-results').classList.remove('open');
+    document.getElementById('incoming-selected-product').classList.remove('show');
+    document.getElementById('incoming-success').classList.remove('show');
+    document.getElementById('incoming-error').classList.remove('show');
+
+    document.getElementById('admin-incoming-overlay').classList.add('open');
+    pushHistory('admin-incoming');
+  }
+
+  function closeAdminIncoming() {
+    document.getElementById('admin-incoming-overlay').classList.remove('open');
+    incomingSelectedProduct = null;
+  }
+
+  function searchProductForIncoming(query) {
+    var results = document.getElementById('incoming-search-results');
+    if (!query || query.length < 1) {
+      results.classList.remove('open');
+      return;
+    }
+    var q       = query.toLowerCase();
+    var matches = products.filter(function(p) {
+      return p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
+    }).slice(0, 8);
+
+    if (matches.length === 0) {
+      results.classList.remove('open');
+      return;
+    }
+
+    results.innerHTML = '';
+    matches.forEach(function(p) {
+      var item = document.createElement('div');
+      item.className = 'product-result-item';
+      item.innerHTML =
+        '<span>' + esc(p.name) + '</span>' +
+        '<span class="product-result-sku">' + esc(p.sku) + ' | מלאי: ' + p.stock + '</span>';
+      item.addEventListener('click', function() {
+        selectProductForIncoming(p);
+      });
+      results.appendChild(item);
+    });
+    results.classList.add('open');
+  }
+
+  function selectProductForIncoming(p) {
+    incomingSelectedProduct = p;
+    document.getElementById('incoming-search').value = p.name;
+    document.getElementById('incoming-search-results').classList.remove('open');
+
+    var selectedEl = document.getElementById('incoming-selected-product');
+    document.getElementById('incoming-selected-name').textContent =
+      p.name + ' (' + p.sku + ')';
+    document.getElementById('incoming-selected-info').textContent =
+      'מלאי נוכחי: ' + p.stock + ' יח\' | מחיר: ' + formatPrice(p.price);
+    selectedEl.classList.add('show');
+
+    document.getElementById('incoming-qty').focus();
+  }
+
+  function submitIncoming() {
+    // ולידציה
+    if (!incomingSelectedProduct) {
+      showAdminError('incoming-error', 'יש לבחור מוצר מהרשימה');
+      return;
+    }
+    var qty = parseInt(document.getElementById('incoming-qty').value);
+    if (!qty || qty < 1) {
+      showAdminError('incoming-error', 'יש להזין כמות תקינה');
+      return;
+    }
+
+    var btn = document.getElementById('incoming-submit-btn');
+    btn.disabled    = true;
+    btn.textContent = 'שומר...';
+
+    fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        token:   sessionStorage.getItem('token') || '',
+        action:  'addIncoming',
+        sku:     incomingSelectedProduct.sku,
+        name:    incomingSelectedProduct.name,
+        qty:     qty,
+        invoice: document.getElementById('incoming-invoice').value || '',
+        note:    document.getElementById('incoming-note').value    || ''
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.token) sessionStorage.setItem('token', data.token);
+      if (data.status === 'OK') {
+        // עדכן מלאי מקומי מיידי
+        incomingSelectedProduct.stock += qty;
+        document.getElementById('incoming-success').classList.add('show');
+        document.getElementById('incoming-error').classList.remove('show');
+        // אפס שדות
+        document.getElementById('incoming-search').value  = '';
+        document.getElementById('incoming-qty').value     = '';
+        document.getElementById('incoming-invoice').value = '';
+        document.getElementById('incoming-note').value    = '';
+        document.getElementById('incoming-selected-product').classList.remove('show');
+        incomingSelectedProduct = null;
+        // רענן מוצרים ברקע
+        setTimeout(loadProducts, 2000);
+      } else {
+        showAdminError('incoming-error', data.message || 'שגיאה בשמירה');
+      }
+      btn.disabled    = false;
+      btn.textContent = '✓ שמור';
+    })
+    .catch(function() {
+      showAdminError('incoming-error', 'שגיאת תקשורת, נסה שוב');
+      btn.disabled    = false;
+      btn.textContent = '✓ שמור';
+    });
+  }
+
+  function showAdminError(elId, msg) {
+    var el = document.getElementById(elId);
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(function() { el.classList.remove('show'); }, 4000);
+  }
 </style>
 </head>
 <body>
@@ -580,6 +799,75 @@
 
 <!-- כפתור חזרה לראש העמוד -->
 <button class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- ═══════════════════════════════════════
+     ממשק Admin – הכנסת סחורה נכנסת
+════════════════════════════════════════ -->
+<div class="admin-overlay" id="admin-incoming-overlay">
+  <div class="admin-sheet">
+
+    <!-- כותרת -->
+    <div class="admin-header">
+      <h3>📦 הכנסת סחורה נכנסת</h3>
+      <button class="admin-close" onclick="closeAdminIncoming()">✕</button>
+    </div>
+
+    <div class="admin-body">
+
+      <!-- הודעות -->
+      <div class="form-success" id="incoming-success">✓ הסחורה נרשמה בהצלחה!</div>
+      <div class="form-error"   id="incoming-error"></div>
+
+      <!-- חיפוש מוצר -->
+      <div class="form-group">
+        <label class="form-label">חיפוש מוצר (לפי שם או מק"ט)</label>
+        <input type="text" class="form-input" id="incoming-search"
+               placeholder="התחל להקליד..."
+               oninput="searchProductForIncoming(this.value)"
+               autocomplete="off">
+        <div class="product-search-results" id="incoming-search-results"></div>
+      </div>
+
+      <!-- מוצר נבחר -->
+      <div class="product-selected" id="incoming-selected-product">
+        <div class="product-selected-name" id="incoming-selected-name"></div>
+        <div class="product-selected-info" id="incoming-selected-info"></div>
+      </div>
+
+      <!-- כמות -->
+      <div class="form-group">
+        <label class="form-label">כמות שנשלחה *</label>
+        <input type="number" class="form-input" id="incoming-qty"
+               placeholder="0" min="1">
+      </div>
+
+      <!-- תעודת משלוח -->
+      <div class="form-group">
+        <label class="form-label">מספר תעודת משלוח</label>
+        <input type="text" class="form-input" id="incoming-invoice"
+               placeholder="אופציונלי">
+      </div>
+
+      <!-- הערה -->
+      <div class="form-group">
+        <label class="form-label">הערה</label>
+        <input type="text" class="form-input" id="incoming-note"
+               placeholder="אופציונלי">
+      </div>
+
+    </div>
+
+    <!-- כפתורים -->
+    <div class="admin-footer">
+      <div class="form-btns">
+        <button class="form-btn-cancel" onclick="closeAdminIncoming()">ביטול</button>
+        <button class="form-btn-submit" id="incoming-submit-btn"
+                onclick="submitIncoming()">✓ שמור</button>
+      </div>
+    </div>
+
+  </div>
+</div>
   
 <!-- Toast הודעות -->
 <div id="toast"></div>
@@ -1170,9 +1458,9 @@
     // Admin בלבד
     if (role === 'admin') {
       body.innerHTML +=
-        '<button class="menu-item" onclick="openAdminSection(\'inventory\');closeMenu()">' +
+        '<button class="menu-item" onclick="openAdminIncoming();closeMenu()">' +
           '<span class="menu-item-icon">📦</span>' +
-          '<span class="menu-item-label">מלאי וסחורה נכנסת</span>' +
+          '<span class="menu-item-label">הכנסת סחורה נכנסת</span>' +
         '</button>';
     }
 
