@@ -158,7 +158,6 @@
     padding-bottom: env(safe-area-inset-bottom);
     margin-top: env(safe-area-inset-top);
   }
-  }
   .sheet-header { padding: 20px 20px 12px; border-bottom: 1px solid #eee; }
   .sheet-header h3 { font-size: 18px; }
   .sheet-header p { font-size: 13px; color: #888; margin-top: 4px; }
@@ -443,142 +442,6 @@
   }
   .form-error.show { display: block; }
 
-  // ═══════════════════════════════════════
-  // Admin – הכנסת סחורה נכנסת
-  // ═══════════════════════════════════════
-  var incomingSelectedProduct = null;
-
-  function openAdminIncoming() {
-    // אפס טופס
-    incomingSelectedProduct = null;
-    document.getElementById('incoming-search').value        = '';
-    document.getElementById('incoming-qty').value           = '';
-    document.getElementById('incoming-invoice').value       = '';
-    document.getElementById('incoming-note').value          = '';
-    document.getElementById('incoming-search-results').classList.remove('open');
-    document.getElementById('incoming-selected-product').classList.remove('show');
-    document.getElementById('incoming-success').classList.remove('show');
-    document.getElementById('incoming-error').classList.remove('show');
-
-    document.getElementById('admin-incoming-overlay').classList.add('open');
-    pushHistory('admin-incoming');
-  }
-
-  function closeAdminIncoming() {
-    document.getElementById('admin-incoming-overlay').classList.remove('open');
-    incomingSelectedProduct = null;
-  }
-
-  function searchProductForIncoming(query) {
-    var results = document.getElementById('incoming-search-results');
-    if (!query || query.length < 1) {
-      results.classList.remove('open');
-      return;
-    }
-    var q       = query.toLowerCase();
-    var matches = products.filter(function(p) {
-      return p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
-    }).slice(0, 8);
-
-    if (matches.length === 0) {
-      results.classList.remove('open');
-      return;
-    }
-
-    results.innerHTML = '';
-    matches.forEach(function(p) {
-      var item = document.createElement('div');
-      item.className = 'product-result-item';
-      item.innerHTML =
-        '<span>' + esc(p.name) + '</span>' +
-        '<span class="product-result-sku">' + esc(p.sku) + ' | מלאי: ' + p.stock + '</span>';
-      item.addEventListener('click', function() {
-        selectProductForIncoming(p);
-      });
-      results.appendChild(item);
-    });
-    results.classList.add('open');
-  }
-
-  function selectProductForIncoming(p) {
-    incomingSelectedProduct = p;
-    document.getElementById('incoming-search').value = p.name;
-    document.getElementById('incoming-search-results').classList.remove('open');
-
-    var selectedEl = document.getElementById('incoming-selected-product');
-    document.getElementById('incoming-selected-name').textContent =
-      p.name + ' (' + p.sku + ')';
-    document.getElementById('incoming-selected-info').textContent =
-      'מלאי נוכחי: ' + p.stock + ' יח\' | מחיר: ' + formatPrice(p.price);
-    selectedEl.classList.add('show');
-
-    document.getElementById('incoming-qty').focus();
-  }
-
-  function submitIncoming() {
-    // ולידציה
-    if (!incomingSelectedProduct) {
-      showAdminError('incoming-error', 'יש לבחור מוצר מהרשימה');
-      return;
-    }
-    var qty = parseInt(document.getElementById('incoming-qty').value);
-    if (!qty || qty < 1) {
-      showAdminError('incoming-error', 'יש להזין כמות תקינה');
-      return;
-    }
-
-    var btn = document.getElementById('incoming-submit-btn');
-    btn.disabled    = true;
-    btn.textContent = 'שומר...';
-
-    fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        token:   sessionStorage.getItem('token') || '',
-        action:  'addIncoming',
-        sku:     incomingSelectedProduct.sku,
-        name:    incomingSelectedProduct.name,
-        qty:     qty,
-        invoice: document.getElementById('incoming-invoice').value || '',
-        note:    document.getElementById('incoming-note').value    || ''
-      })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.token) sessionStorage.setItem('token', data.token);
-      if (data.status === 'OK') {
-        // עדכן מלאי מקומי מיידי
-        incomingSelectedProduct.stock += qty;
-        document.getElementById('incoming-success').classList.add('show');
-        document.getElementById('incoming-error').classList.remove('show');
-        // אפס שדות
-        document.getElementById('incoming-search').value  = '';
-        document.getElementById('incoming-qty').value     = '';
-        document.getElementById('incoming-invoice').value = '';
-        document.getElementById('incoming-note').value    = '';
-        document.getElementById('incoming-selected-product').classList.remove('show');
-        incomingSelectedProduct = null;
-        // רענן מוצרים ברקע
-        setTimeout(loadProducts, 2000);
-      } else {
-        showAdminError('incoming-error', data.message || 'שגיאה בשמירה');
-      }
-      btn.disabled    = false;
-      btn.textContent = '✓ שמור';
-    })
-    .catch(function() {
-      showAdminError('incoming-error', 'שגיאת תקשורת, נסה שוב');
-      btn.disabled    = false;
-      btn.textContent = '✓ שמור';
-    });
-  }
-
-  function showAdminError(elId, msg) {
-    var el = document.getElementById(elId);
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(function() { el.classList.remove('show'); }, 4000);
-  }
 </style>
 </head>
 <body>
@@ -1496,6 +1359,144 @@
   window.addEventListener('scroll', function() {
     scrollTopBtn.classList.toggle('visible', window.scrollY > 300);
   }, { passive: true });
+
+  // ═══════════════════════════════════════
+  // Admin – הכנסת סחורה נכנסת
+  // ═══════════════════════════════════════
+  var incomingSelectedProduct = null;
+
+  function openAdminIncoming() {
+    // אפס טופס
+    incomingSelectedProduct = null;
+    document.getElementById('incoming-search').value        = '';
+    document.getElementById('incoming-qty').value           = '';
+    document.getElementById('incoming-invoice').value       = '';
+    document.getElementById('incoming-note').value          = '';
+    document.getElementById('incoming-search-results').classList.remove('open');
+    document.getElementById('incoming-selected-product').classList.remove('show');
+    document.getElementById('incoming-success').classList.remove('show');
+    document.getElementById('incoming-error').classList.remove('show');
+
+    document.getElementById('admin-incoming-overlay').classList.add('open');
+    pushHistory('admin-incoming');
+  }
+
+  function closeAdminIncoming() {
+    document.getElementById('admin-incoming-overlay').classList.remove('open');
+    incomingSelectedProduct = null;
+  }
+
+  function searchProductForIncoming(query) {
+    var results = document.getElementById('incoming-search-results');
+    if (!query || query.length < 1) {
+      results.classList.remove('open');
+      return;
+    }
+    var q       = query.toLowerCase();
+    var matches = products.filter(function(p) {
+      return p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
+    }).slice(0, 8);
+
+    if (matches.length === 0) {
+      results.classList.remove('open');
+      return;
+    }
+
+    results.innerHTML = '';
+    matches.forEach(function(p) {
+      var item = document.createElement('div');
+      item.className = 'product-result-item';
+      item.innerHTML =
+        '<span>' + esc(p.name) + '</span>' +
+        '<span class="product-result-sku">' + esc(p.sku) + ' | מלאי: ' + p.stock + '</span>';
+      item.addEventListener('click', function() {
+        selectProductForIncoming(p);
+      });
+      results.appendChild(item);
+    });
+    results.classList.add('open');
+  }
+
+  function selectProductForIncoming(p) {
+    incomingSelectedProduct = p;
+    document.getElementById('incoming-search').value = p.name;
+    document.getElementById('incoming-search-results').classList.remove('open');
+
+    var selectedEl = document.getElementById('incoming-selected-product');
+    document.getElementById('incoming-selected-name').textContent =
+      p.name + ' (' + p.sku + ')';
+    document.getElementById('incoming-selected-info').textContent =
+      'מלאי נוכחי: ' + p.stock + ' יח\' | מחיר: ' + formatPrice(p.price);
+    selectedEl.classList.add('show');
+
+    document.getElementById('incoming-qty').focus();
+  }
+
+  function submitIncoming() {
+    // ולידציה
+    if (!incomingSelectedProduct) {
+      showAdminError('incoming-error', 'יש לבחור מוצר מהרשימה');
+      return;
+    }
+    var qty = parseInt(document.getElementById('incoming-qty').value);
+    if (!qty || qty < 1) {
+      showAdminError('incoming-error', 'יש להזין כמות תקינה');
+      return;
+    }
+
+    var btn = document.getElementById('incoming-submit-btn');
+    btn.disabled    = true;
+    btn.textContent = 'שומר...';
+
+    fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        token:   sessionStorage.getItem('token') || '',
+        action:  'addIncoming',
+        sku:     incomingSelectedProduct.sku,
+        name:    incomingSelectedProduct.name,
+        qty:     qty,
+        invoice: document.getElementById('incoming-invoice').value || '',
+        note:    document.getElementById('incoming-note').value    || ''
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.token) sessionStorage.setItem('token', data.token);
+      if (data.status === 'OK') {
+        // עדכן מלאי מקומי מיידי
+        incomingSelectedProduct.stock += qty;
+        document.getElementById('incoming-success').classList.add('show');
+        document.getElementById('incoming-error').classList.remove('show');
+        // אפס שדות
+        document.getElementById('incoming-search').value  = '';
+        document.getElementById('incoming-qty').value     = '';
+        document.getElementById('incoming-invoice').value = '';
+        document.getElementById('incoming-note').value    = '';
+        document.getElementById('incoming-selected-product').classList.remove('show');
+        incomingSelectedProduct = null;
+        // רענן מוצרים ברקע
+        setTimeout(loadProducts, 2000);
+      } else {
+        showAdminError('incoming-error', data.message || 'שגיאה בשמירה');
+      }
+      btn.disabled    = false;
+      btn.textContent = '✓ שמור';
+    })
+    .catch(function() {
+      showAdminError('incoming-error', 'שגיאת תקשורת, נסה שוב');
+      btn.disabled    = false;
+      btn.textContent = '✓ שמור';
+    });
+  }
+
+  function showAdminError(elId, msg) {
+    var el = document.getElementById(elId);
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(function() { el.classList.remove('show'); }, 4000);
+  }
+
 </script>
 </body>
 </html>
