@@ -330,9 +330,14 @@
     font-weight: normal;
   }
   .card-price-sale { 
-    color: #e53935; 
-    font-weight: bold; 
-    font-size: 13px; 
+    color: #ff0000; 
+    font-weight: 700; 
+    font-size: 14px; 
+  }
+  .product-price-sale {
+    color: #ff0000;
+    font-weight: 700;
+    font-size: 17px;
   }
   .product-price-original {
     text-decoration: line-through;
@@ -592,6 +597,14 @@
   var selectedProduct  = null;
 
   // ═══════════════════════════════════════
+  // פורמט מחיר – ₪1,234
+  // ═══════════════════════════════════════
+  function formatPrice(num) {
+    if (!num) return '—';
+    return '₪' + Number(num).toLocaleString('he-IL');
+  }
+  
+  // ═══════════════════════════════════════
   // XSS Protection – escape כל נתון לפני HTML
   // ═══════════════════════════════════════
   function esc(str) {
@@ -772,10 +785,10 @@
           '<div class="card-info">' +
             (p.salePrice
               ? '<div class="card-price">' +
-                  '<span class="card-price-original">&#8362;' + esc(p.price) + '</span> ' +
-                  '<span class="card-price-sale">&#8362;' + esc(p.salePrice) + '</span>' +
+                  '<span class="card-price-original">' + formatPrice(p.price) + '</span> ' +
+                  '<span class="card-price-sale">' + formatPrice(p.salePrice) + '</span>' +
                 '</div>'
-              : '<div class="card-price" style="color:' + esc(headerColor) + '">&#8362;' + esc(p.price) + '</div>'
+              : '<div class="card-price" style="color:' + esc(headerColor) + '">' + formatPrice(p.price) + '</div>'
             ) +
             '<div class="card-name">'  + esc(p.name)  + '</div>' +
             '<div class="card-sku">'   + esc(p.sku)   + '</div>' +
@@ -845,7 +858,7 @@
         '<div class="cart-item-info">' +
           '<div class="cart-item-name">'  + esc(p.name)  + '</div>' +
           '<div class="cart-item-sku">'   + esc(p.sku)   + '</div>' +
-          '<div class="cart-item-price" style="color:' + headerColor + '">&#8362;' + esc(p.price) + ' ליח\'</div>' +
+          '<div class="cart-item-price" style="color:' + headerColor + '">' + formatPrice(p.price) + ' ליח\'</div>' +
           '<div class="cart-qty-control">' +
             '<button class="qty-btn" onclick="changeQty(\'' + esc(sku) + '\',-1)">&#8722;</button>' +
             '<span class="qty-val" id="qty-' + esc(sku) + '">' + cart[sku].qty + '</span>' +
@@ -1016,20 +1029,20 @@
     document.getElementById('pd-name').textContent           = p.name;
     document.getElementById('pd-sku').textContent            = p.sku;
     document.getElementById('pd-brand').textContent          = p.brand || '—';
-    document.getElementById('pd-price-retail').textContent   = p.retailPrice ? '&#8362;' + p.retailPrice : '—';
+    document.getElementById('pd-price-retail').textContent  = formatPrice(p.retailPrice);
     var priceConsumerEl = document.getElementById('pd-price-consumer');
     var promoDatesEl    = document.getElementById('pd-promo-dates-row');
     var promoRowEl      = document.getElementById('pd-promo-row');
 
     if (p.salePrice) {
       priceConsumerEl.innerHTML =
-        '<span class="product-price-original">&#8362;' + esc(p.price) + '</span>';
+        '<span class="product-price-original">' + formatPrice(p.price) + '</span>';
       promoRowEl.style.display  = 'flex';
-      document.getElementById('pd-promo-price').textContent = '₪' + p.salePrice;
+      document.getElementById('pd-promo-price').textContent = formatPrice(p.salePrice);
       promoDatesEl.style.display = 'flex';
       document.getElementById('pd-promo-dates').textContent = p.promoStart + ' – ' + p.promoEnd;
     } else {
-      priceConsumerEl.textContent = p.price ? '₪' + p.price : '—';
+      priceConsumerEl.textContent = formatPrice(p.price);
       promoRowEl.style.display    = 'none';
       promoDatesEl.style.display  = 'none';
     }
