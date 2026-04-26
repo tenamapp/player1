@@ -1455,29 +1455,26 @@
     body.innerHTML = '';
     var role = sessionStorage.getItem('role');
 
-    // Admin בלבד
     if (role === 'admin') {
-      body.innerHTML +=
-        '<button class="menu-item" onclick="openAdminIncoming();closeMenu()">' +
-          '<span class="menu-item-icon">📦</span>' +
-          '<span class="menu-item-label">הכנסת סחורה נכנסת</span>' +
-        '</button>';
+      var btnIncoming = document.createElement('button');
+      btnIncoming.className = 'menu-item';
+      btnIncoming.innerHTML = '<span class="menu-item-icon">📦</span><span class="menu-item-label">הכנסת סחורה נכנסת</span>';
+      btnIncoming.addEventListener('click', function() { closeMenu(); openAdminIncoming(); });
+      body.appendChild(btnIncoming);
     }
 
-    // כולם
-    body.innerHTML +=
-      '<button class="menu-item" onclick="openAdminSection(\'history\');closeMenu()">' +
-        '<span class="menu-item-icon">📋</span>' +
-        '<span class="menu-item-label">היסטוריית מכירות</span>' +
-      '</button>';
+    var btnHistory = document.createElement('button');
+    btnHistory.className = 'menu-item';
+    btnHistory.innerHTML = '<span class="menu-item-icon">📋</span><span class="menu-item-label">היסטוריית מכירות</span>';
+    btnHistory.addEventListener('click', function() { closeMenu(); showToast('בקרוב: היסטוריה'); });
+    body.appendChild(btnHistory);
 
-    // Admin בלבד
     if (role === 'admin') {
-      body.innerHTML +=
-        '<button class="menu-item" onclick="openAdminSection(\'stats\');closeMenu()">' +
-          '<span class="menu-item-icon">📊</span>' +
-          '<span class="menu-item-label">סטטיסטיקות</span>' +
-        '</button>';
+      var btnStats = document.createElement('button');
+      btnStats.className = 'menu-item';
+      btnStats.innerHTML = '<span class="menu-item-icon">📊</span><span class="menu-item-label">סטטיסטיקות</span>';
+      btnStats.addEventListener('click', function() { closeMenu(); showToast('בקרוב: סטטיסטיקות'); });
+      body.appendChild(btnStats);
     }
   }
 
