@@ -461,10 +461,12 @@
       <input type="password" id="pin-input" placeholder="סיסמה"
              autocomplete="current-password" dir="rtl"
              onkeydown="if(event.key==='Enter')doLogin()"
-             style="width:100%;padding:12px 40px 12px 16px;border:1px solid #ddd;border-radius:10px;font-size:16px;direction:rtl;unicode-bidi:plaintext;">
-      <button type="button" onclick="togglePasswordVisibility()"
-              style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#aaa;font-size:13px;padding:4px;"
-              id="toggle-pw-btn">הצג</button>
+             style="width:100%;padding:12px 16px 12px 50px;border:1px solid #ddd;border-radius:10px;font-size:16px;direction:rtl;unicode-bidi:plaintext;box-sizing:border-box;">
+      <button type="button" onclick="togglePasswordVisibility()" id="toggle-pw-btn"
+              style="position:absolute;left:8px;top:50%;transform:translateY(-50%);
+                     background:white;border:1px solid #ddd;border-radius:6px;
+                     cursor:pointer;color:#888;font-size:11px;padding:3px 7px;
+                     white-space:nowrap;line-height:1.4;">הצג</button>
     </div>
     <button id="login-btn" onclick="doLogin()">כניסה</button>
     <div class="login-error" id="login-error">שם משתמש או סיסמה שגויים</div>
@@ -1080,7 +1082,6 @@
     var items = Object.keys(cart).filter(function(s) { return cart[s].qty > 0; });
     if (items.length === 0) return;
 
-    // בדיקת מלאי לפני שליחה
     var overStock = [];
     items.forEach(function(sku) {
       var p = products.find(function(x) { return x.sku === sku; });
@@ -1092,46 +1093,51 @@
 
     var btn = document.getElementById('send-btn');
     btn.disabled = true; btn.textContent = 'שולח...';
-
-    var calls    = items.length;
-    var done     = 0;
     var cartCopy = JSON.parse(JSON.stringify(cart));
 
-    items.forEach(function(sku) {
+    // בנה מערך פריטים
+    var saleItems = items.map(function(sku) {
       var p = products.find(function(x) { return x.sku === sku; });
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          token:       sessionStorage.getItem('token') || '',
-          sku:         sku,
-          productName: p ? p.name : sku,
-          quantity:    cartCopy[sku].qty,
-          note:        cartCopy[sku].note || '',
-          username:    sessionStorage.getItem('username') || ''
-        })
-      }).then(function() {
-        done++;
-        if (done === calls) {
-          items.forEach(function(s) {
-            var prod = products.find(function(x) { return x.sku === s; });
-            if (prod) prod.stock = Math.max(0, prod.stock - cartCopy[s].qty);
-          });
-          cart = {};
-          updateCartBadge();
-          closeCart();
-          renderProducts(products);
-          showToast('&#10003; ' + calls + ' פריטים דווחו בהצלחה');
-          btn.disabled = false; btn.textContent = '&#10003; שלח דיווח';
-          btn.style.background = headerColor;
-          setTimeout(loadProducts, 3000);
-        }
-      }).catch(function() {
-        done++;
-        if (done === calls) {
-          showToast('שגיאה בשליחה, נסה שוב');
-          btn.disabled = false; btn.textContent = '&#10003; שלח דיווח';
-        }
-      });
+      return {
+        sku:         sku,
+        productName: p ? p.name : sku,
+        quantity:    cartCopy[sku].qty,
+        note:        cartCopy[sku].note || ''
+      };
+    });
+
+    fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        token:    sessionStorage.getItem('token') || '',
+        items:    saleItems,
+        username: sessionStorage.getItem('username') || ''
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.token) sessionStorage.setItem('token', data.token);
+      if (data.status === 'OK') {
+        items.forEach(function(s) {
+          var prod = products.find(function(x) { return x.sku === s; });
+          if (prod) prod.stock = Math.max(0, prod.stock - cartCopy[s].qty);
+        });
+        cart = {};
+        updateCartBadge();
+        closeCart();
+        renderProducts(products);
+        showToast('✓ ' + saleItems.length + ' פריטים דווחו בהצלחה');
+        btn.disabled = false; btn.textContent = '✓ שלח דיווח';
+        btn.style.background = headerColor;
+        setTimeout(loadProducts, 3000);
+      } else {
+        showToast('שגיאה: ' + (data.message || 'נסה שוב'));
+        btn.disabled = false; btn.textContent = '✓ שלח דיווח';
+      }
+    })
+    .catch(function() {
+      showToast('שגיאת תקשורת, נסה שוב');
+      btn.disabled = false; btn.textContent = '✓ שלח דיווח';
     });
   }
 
