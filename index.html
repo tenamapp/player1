@@ -442,6 +442,20 @@
   }
   .form-error.show { display: block; }
 
+/* ── תגית תצוגה ── */
+  .display-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-right: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.3px;
+  }
+  
 </style>
 </head>
 <body>
@@ -593,8 +607,8 @@
       <div class="sheet-body" id="cart-body"></div>
       <div class="sheet-footer">
         <div class="sheet-total">
-          <span>סה"כ</span>
-          <span id="cart-total">₪0</span>
+          <span>סה"כ פריטים</span>
+          <span id="cart-total">0</span>
         </div>
         <div class="sheet-btns">
           <button class="btn-back" onclick="closeCart()">חזור→</button>
@@ -955,7 +969,10 @@
                 '</div>'
               : '<div class="card-price" style="color:' + esc(headerColor) + '">' + formatPrice(p.price) + '</div>'
             ) +
-            '<div class="card-name">'  + esc(p.name)  + '</div>' +
+            '<div class="card-name">' +
+              (p.displayOnly ? '<span class="display-badge">תצוגה</span>' : '') +
+              esc(p.name) +
+            '</div>' +
             '<div class="card-sku">'   + esc(p.sku)   + '</div>' +
             '<div class="card-stock">מלאי: <span>' + (p.stock <= 0 ? 'אזל' : esc(p.stock)) + '</span></div>' +
           '</div>' +
@@ -1004,7 +1021,7 @@
     if (items.length === 0) {
       body.innerHTML = '<div class="empty-cart">העגלה ריקה</div>';
       document.getElementById('cart-subtitle').textContent = '0 פריטים';
-      document.getElementById('cart-total').textContent = '₪0';
+      document.getElementById('cart-total').textContent = '0';
       return;
     }
     document.getElementById('cart-subtitle').textContent = items.length + ' פריטים';
@@ -1034,7 +1051,8 @@
         '<div class="cart-item-remove" onclick="removeFromCart(\'' + esc(sku) + '\')">&#10005;</div>';
       body.appendChild(row);
     });
-    document.getElementById('cart-total').textContent = '₪' + grandTotal.toLocaleString();
+    var totalQty = items.reduce(function(s, sku) { return s + cart[sku].qty; }, 0);
+    document.getElementById('cart-total').textContent = totalQty + ' יח\'';
   }
 
   function changeQty(sku, delta) {
@@ -1076,7 +1094,8 @@
       var p = products.find(function(x) { return x.sku === sku; });
       if (p) grandTotal += cart[sku].qty * p.price;
     });
-    document.getElementById('cart-total').textContent    = '₪' + grandTotal.toLocaleString();
+    var totalQty2 = items.reduce(function(s, sku) { return s + cart[sku].qty; }, 0);
+    document.getElementById('cart-total').textContent = totalQty2 + ' יח\'';
     document.getElementById('cart-subtitle').textContent = items.length + ' פריטים';
   }
 
